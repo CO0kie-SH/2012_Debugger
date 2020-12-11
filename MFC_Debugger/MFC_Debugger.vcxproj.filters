@@ -54,6 +54,9 @@
     <ClInclude Include="RegStruct.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CDLG_MEM.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Debugger.cpp">
@@ -81,6 +84,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CDebug.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CDLG_MEM.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

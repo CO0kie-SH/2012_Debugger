@@ -190,6 +190,7 @@
     <ClInclude Include="CConsole.h" />
     <ClInclude Include="CDATA.h" />
     <ClInclude Include="CDebug.h" />
+    <ClInclude Include="CDLG_MEM.h" />
     <ClInclude Include="CManage.h" />
     <ClInclude Include="CMyView.h" />
     <ClInclude Include="framework.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="CConsole.cpp" />
     <ClCompile Include="CDATA.cpp" />
     <ClCompile Include="CDebug.cpp" />
+    <ClCompile Include="CDLG_MEM.cpp" />
     <ClCompile Include="CManage.cpp" />
     <ClCompile Include="CMyView.cpp" />
     <ClCompile Include="MFC_Debugger.cpp" />

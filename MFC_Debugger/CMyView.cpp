@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CMyView.h"
 
-CMyView::CMyView(CDialogEx* wMain)
+CMyView::CMyView(CDialogEx* wMain)/*:mDLG_MEM(0)*/
 {
 	m_StatusBar.Create(WS_CHILD | WS_VISIBLE | SBT_OWNERDRAW, CRect(0, 0, 0, 0), wMain, 0);
 	CRect rect;
@@ -13,23 +13,30 @@ CMyView::CMyView(CDialogEx* wMain)
 	m_StatusBar.SetText(L"当前范围", 1, 0);
 	m_StatusBar.SetText(L"时间", 2, 0);
 	this->mMain = wMain;
-	this->mWind = wMain->GetSafeHwnd();
+	this->mh_Wind = wMain->GetSafeHwnd();
 }
 
 CMyView::~CMyView()
 {
+	delete mDLG_MEM;
 }
 
 BOOL CMyView::InitView()
 {
 	RECT rect;
 	HWND hWnd = gINFO_mWind.hwCON;
-	::GetWindowRect(this->mWind, &rect);
+	::GetWindowRect(this->mh_Wind, &rect);
 
 	//设置控制台
 	::MoveWindow(hWnd, 0, 55, rect.right-rect.left-24, rect.bottom-rect.top /*- 120*/, 1);
 	::UpdateWindow(hWnd);
-	::SetWindowText(hWnd, L"等待调试进程建立。");
+	//::SetWindowText(hWnd, L"等待调试进程建立。");
+
+	//初始化内存子窗口
+	mDLG_MEM = new CDLG_MEM();
+	mDLG_MEM->Create(IDD_DIALOG1, this->mMain);
+	mDLG_MEM->ShowWindow(SW_SHOW);
+
 	return true;
 }
 

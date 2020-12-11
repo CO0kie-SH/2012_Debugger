@@ -1,5 +1,6 @@
 #pragma once
 #include "resource.h"
+#include "CDLG_MEM.h"
 
 class CMyView
 {
@@ -10,9 +11,12 @@ public:
 	BOOL InitView();
 	void SetTime();
 private:
-	HWND mWind;
+	HWND mh_Wind;
+	//控件指针
 	CDialogEx* mMain;
+	CDLG_MEM* mDLG_MEM;
 
+	//创建临时对象
 	CString mstr;
 	CTime t;
 	//参考https://blog.csdn.net/HW140701/article/details/53995464
