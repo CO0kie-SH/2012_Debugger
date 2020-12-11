@@ -40,5 +40,7 @@ public:
 	BOOL AddSoftPoint(LPVOID Address);
 	// 软件断点处理函数
 	DWORD SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak);
+
+	SIZE_T ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen);
 };
 

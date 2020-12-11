@@ -254,7 +254,6 @@ DWORD CDebug::SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak)
 					return 0;
 				}
 			}
-
 			// eip -1 ½«ÐÞ¸´ÏÝÚåÒì³£
 			CONTEXT context = { CONTEXT_FULL };
 			GetThreadContext(gDATA.PS.hThread, &context);
@@ -267,4 +266,12 @@ DWORD CDebug::SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak)
 		break;
 	}
 	return bRet;
+}
+
+SIZE_T CDebug::ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen)
+{
+	SIZE_T Read;
+	if (NULL == ReadProcessMemory(gDATA.PS.hProcess, Address, ReadBuff, ReadLen, &Read))
+		return 0;
+	return Read;
 }

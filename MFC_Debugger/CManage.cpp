@@ -28,7 +28,6 @@ CManage::CManage()
 CManage::~CManage()
 {
 	OutputDebugString(L"~CManage()\n");
-	
 	//关闭调试器
 	if (gDATA.CDEBUG)
 	{
@@ -37,6 +36,7 @@ CManage::~CManage()
 	}
 	//关闭控制台
 	delete m_cConsole;
+	//关闭视图
 	delete gcView;
 }
 
@@ -61,8 +61,11 @@ void CManage::MenuClick(UINT_PTR nID)
 	switch (nID)
 	{
 	case ID_32771:	//打开文件
-		if (gDATA.CDEBUG)
-			break;	//已经存在调试
+		if (gDATA.CDEBUG)	//已经存在调试
+		{
+			puts("已经有调试线程了。");
+			return;
+		}
 		mh_Debug =(HANDLE) _beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath, 0, 0);
 		break;
 	case ID_32775:	//退出
