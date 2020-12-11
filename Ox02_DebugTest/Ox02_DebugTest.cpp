@@ -44,10 +44,20 @@ void show(CProInfo1& cInfo)
 #pragma endregion
 }
 
+int i = 9;
+
 int main()
 {
     std::cout << "Hello World!\n";
     CProInfo1 cInfo;
     show(cInfo);
+    while (i)
+    {
+        i--;
+        _asm xor eax, eax;
+        _asm xor eax, eax;
+        printf("%d\n", i);
+        Sleep(333);
+    }
     getchar();
 }

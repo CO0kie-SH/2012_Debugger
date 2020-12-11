@@ -15,6 +15,9 @@ private:
 	//控件指针
 	CDialogEx* mMain;
 	CDLG_MEM* mDLG_MEM;
+	CListCtrl* mLS_Mem;
+	CListCtrl* mLS_Stack;
+
 
 	//创建临时对象
 	CString mstr;

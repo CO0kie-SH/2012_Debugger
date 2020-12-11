@@ -42,6 +42,16 @@ BOOL CDLG_MEM::OnInitDialog()
 	CTabCtrl* CTAB_MEM = (CTabCtrl*)GetDlgItem(IDC_TAB1);
 	CTAB_MEM->InsertItem(0, L"内存1");
 	CTAB_MEM->InsertItem(1, L"内存2");
+
+	CListCtrl* cList = (CListCtrl*)GetDlgItem(IDC_LIST1);
+	cList->InsertColumn(0, L"16进制", 0, 100);
+	cList->InsertColumn(0, L"地址", 0, 100);
+	
+	cList = (CListCtrl*)GetDlgItem(IDC_LIST2);
+	cList->InsertColumn(0, L"16进制", 0, 100);
+	cList->InsertColumn(0, L"地址", 0, 100);
+
+	gINFO_mWind.hwMEM = this->GetSafeHwnd();
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE
 }

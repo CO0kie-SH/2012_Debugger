@@ -59,8 +59,9 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 			gDATA.OEP = dbg_event.u.CreateProcessInfo.lpStartAddress; // 程序入口
 			printf("进程创建事件触发,OEP=%p\n", gDATA.OEP);
 			this->DisASM(gDATA.OEP, 5);
-			printf("增加OEP软件断点=%d\n",
-				this->AddSoftPoint(gDATA.OEP));
+			printf("增加OEP硬件断点=%d\n",
+				this->AddHardPoint(gDATA.OEP, defBP_硬件执行));
+				//this->AddSoftPoint(gDATA.OEP, defBP_软件执行));
 		}break;
 		case EXIT_THREAD_DEBUG_EVENT:   // 退出线程事件
 			printf("线程退出事件触发\n");
@@ -87,11 +88,8 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 			dbg_event.dwProcessId,   //调试进程ID,必须从DEBUG_EVNET中获取
 			dbg_event.dwThreadId,    //调试线程ID,必须从DEBUG_EVNET中获取
 			dbg_status);			 //异常是否处理，只对异常有效
-
 	}
-
 	CloseHandle(ps.hThread);
-	::TerminateProcess(ps.hProcess, 0);
 	CloseHandle(ps.hProcess);
 	return 0;
 }
@@ -103,10 +101,6 @@ DWORD CDebug::OnExceptionHandler(LPDEBUG_EVENT pDbg_event)
 	LPVOID ExceptionAddress = pDbg_event->u.Exception.ExceptionRecord.ExceptionAddress;
 	// 异常触发的错误码
 	DWORD ExceptionCode = pDbg_event->u.Exception.ExceptionRecord.ExceptionCode;
-	// 获取进程句柄
-	//HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pDbg_event->dwProcessId);
-	// 线程句柄
-	//HANDLE hThread = OpenThread(THREAD_ALL_ACCESS, FALSE, pDbg_event->dwThreadId);
 	// 处理状态码
 	DWORD status_code = DBG_EXCEPTION_NOT_HANDLED;
 	printf("\t错误码：0x%lX,异常地址=%p", ExceptionCode, ExceptionAddress);
@@ -118,27 +112,142 @@ DWORD CDebug::OnExceptionHandler(LPDEBUG_EVENT pDbg_event)
 	case EXCEPTION_ACCESS_VIOLATION:      // 非法访问异常
 		break;
 	case EXCEPTION_BREAKPOINT:            // 断点异常
-		if (ExceptionAddress == gDATA.OEP)
-		{
-			printf("\n\t检测到OEP断点，进行修复");
-			SetBreakPoint(ExceptionAddress, defBP_断点暂停,false);
-			//printf("已在OEP处断下，请处理：");
-		}
-		// 处理软件断点
-		//status_code = OnException_BreakPoint(ExceptionAddress, hProcess, hThread);
+		status_code = OnException_BreakPoint(ExceptionAddress, pDbg_event);
 		break;
 	case EXCEPTION_SINGLE_STEP:           // 单步或硬件断点异常
-		//status_code = OnException_SingleStep(ExceptionAddress, hProcess, hThread);
+		status_code = OnException_SingleStep(ExceptionAddress, pDbg_event);
 		break;
 	case EXCEPTION_DATATYPE_MISALIGNMENT: // 内存对齐异常
 	case EXCEPTION_ILLEGAL_INSTRUCTION:   // 无效指令
 	case EXCEPTION_INT_DIVIDE_BY_ZERO:    // 除0错误
 	case EXCEPTION_PRIV_INSTRUCTION:      // 指令不支持当前模式
 		break;
+	default:
+		std::cout << "\n\t未知错误断下：";
+		this->DisASM(ExceptionAddress, 5);
+		break;
 	}
-	this->DisASM(ExceptionAddress, 5);
 	return DBG_CONTINUE;
 }
+
+DWORD CDebug::OnException_BreakPoint(LPVOID Address, LPDEBUG_EVENT pDbg_event)
+{
+	bool isASM = true;
+	if (IsSystemBreakPoint)
+	{
+		printf("\n\t检测到系统载入断点,");
+		IsSystemBreakPoint = FALSE;
+		this->msz_Line = "已在载入点断下，请处理：";
+	}
+	else if (Address == gDATA.OEP)
+	{
+		printf("\n\t检测到OEP断点，进行修复");
+		SetBreakPoint(Address, defBP_断点暂停, false);
+		this->msz_Line = "已在OEP处断下，请处理：";
+	}
+	else if (this->mb_Flagp)
+	{
+		printf("\n\t单步步过，进行修复");
+		SetBreakPoint(Address, defBP_断点暂停, defBP_断点删除);
+		this->mb_Flagp = false;
+	}
+
+	if(isASM)
+		this->DisASM(Address, 5);
+	if (this->mb_Wait)
+		this->OnLine();
+	return DBG_CONTINUE;
+}
+
+DWORD CDebug::OnException_SingleStep(LPVOID Address, LPDEBUG_EVENT pDbg_event)
+{
+	bool isASM = true;
+	this->mb_Wait = true;
+	// 判断是否是普通单步
+	if (this->mb_Flagt)
+	{
+		printf("\n\t检测到单步步入,\t");
+		this->mb_Flagt = false;
+		this->msz_Line = "已经单步断下，请处理：";
+	}
+	else
+	{
+		BreakPoint tmp = this->mBreakPoint[Address];
+		if (tmp.TYPES == 0)
+			std::cout << "\n\t未知错误？不存在该断点";
+		else if (tmp.TYPES == defBP_硬件执行)
+		{
+			printf("\n\t检测到硬件执行断点");
+			this->msz_Line = "硬件执行断下，请处理：";
+		}
+	}
+	if (isASM)
+		this->DisASM(Address, 5);
+	if (this->mb_Wait)
+		this->OnLine();
+	return DBG_CONTINUE;
+}
+
+DWORD CDebug::OnLine()
+{
+	char cmdline[200] = {};
+	char cmd[100] = {};
+	DWORD address = {};
+	while (true)
+	{
+		if (msz_Line)
+			std::cout << msz_Line;
+		// 获取命令
+		gets_s(cmdline, 200); // bp 0x3333333
+
+		// 解析命令
+		if (sscanf_s(cmdline, "%s", cmd, 100))
+		{
+			// 判断是否是g命令
+			if (strcmp(cmd, "g") == 0)
+			{
+				break; // 运行程序
+			}
+			//// 判断是否是断点命令
+			//if (strcmp(cmd, "bp") == 0)
+			//{
+			//	sscanf_s(cmdline, "%s %x", cmd, 100, &address);
+			//	// 设置软件断点
+			//	SetBreakPoint(hProcess, (LPVOID)address);
+			//}
+			//// 设置单步断点
+			else if (strcmp(cmd, "t") == 0)
+			{
+				// 线程上下文
+				CONTEXT context = { CONTEXT_FULL };
+				// 获取线程上下文
+				GetThreadContext(gDATA.PS.hThread, &context);
+				((PEFLAGS)&context.EFlags)->TF = 1;
+				// 设置线程上下文
+				SetThreadContext(gDATA.PS.hThread, &context);
+				this->mb_Flagt = TRUE;
+				break;
+			}
+			else if (strcmp(cmd, "p") == 0)
+			{
+				std::cout << "\t正在设置下一条断点";
+				this->mb_Flagp = TRUE;
+				// 线程上下文
+				CONTEXT context = { CONTEXT_FULL };
+				// 获取线程上下文
+				GetThreadContext(gDATA.PS.hThread, &context);
+				this->DisASM((LPVOID)context.Eip, 5);
+				break;
+			}
+		}
+		else {
+			printf("命令输入错误\n");
+		}
+	}
+	msz_Line = 0;
+	return 0;
+}
+
 
 DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 {
@@ -157,7 +266,6 @@ DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 
 
 	ReadProcessMemory(ps.hProcess, Address, szOpcode, 200, &dwSize);
-	printf("\t读取指令长度=%lu\n", dwSize);
 	count = cs_disasm(handle,		/*反汇编器句柄,从cs_open函数得到*/
 		szOpcode,					/*需要反汇编的opcode的缓冲区首地址*/
 		sizeof(szOpcode),			/*opcode的字节数*/
@@ -165,8 +273,41 @@ DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 		ReadLen,				/*需要反汇编的指令条数,如果是0,则反汇编出全部*/
 		&pInsn/*反汇编输出*/
 	);
-	size_t j;
-	for (j = 0; j < count; j++) {
+	if (this->mb_Flagp)			//设置单步补过
+	{
+		if (/*strcmp(pInsn[0].mnemonic, "jmp") == 0 ||*/
+			strcmp(pInsn[0].mnemonic, "call") == 0)
+		{
+			std::cout << "(CC)";
+			szOpcode[pInsn[0].size] = 0xCC;
+			count = cs_disasm(handle,		/*反汇编器句柄,从cs_open函数得到*/
+				szOpcode,					/*需要反汇编的opcode的缓冲区首地址*/
+				sizeof(szOpcode),			/*opcode的字节数*/
+				(uint64_t)Address,			/*opcode的所在的内存地址*/
+				ReadLen,				/*需要反汇编的指令条数,如果是0,则反汇编出全部*/
+				&pInsn/*反汇编输出*/
+			);
+			DWORD_PTR add = pInsn[0].size + (DWORD_PTR)Address;
+			this->AddSoftPoint((LPVOID)add, defBP_单步步过);
+		}
+		else {
+			std::cout << "(TF)\n";
+			// 线程上下文
+			CONTEXT context = { CONTEXT_FULL };
+			// 获取线程上下文
+			GetThreadContext(gDATA.PS.hThread, &context);
+			((PEFLAGS)&context.EFlags)->TF = 1;
+			// 设置线程上下文
+			SetThreadContext(gDATA.PS.hThread, &context);
+			this->mb_Flagt = TRUE;
+			this->mb_Flagp = false;
+			cs_free(pInsn, count);
+			cs_close(&handle);
+			return 0;
+		}
+	}
+	printf("\t读取指令长度=%lu\n", dwSize);
+	for (size_t j = 0; j < count; j++) {
 		strA = "";
 		for (byte k = 0,by; k < pInsn[j].size; k++)
 		{
@@ -187,9 +328,8 @@ DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 	return 0;
 }
 
-BOOL CDebug::AddSoftPoint(LPVOID Address)
+BOOL CDebug::AddSoftPoint(LPVOID Address, WORD Type)
 {
-	BYTE buff[16] = { 0 };
 	BOOL bRet = false;
 	BreakPoint tmp = this->mBreakPoint[Address];
 	if (tmp.TYPES)
@@ -197,18 +337,53 @@ BOOL CDebug::AddSoftPoint(LPVOID Address)
 		printf("断点已存在：%p", Address);
 		return 0;
 	}
-
 	else
 	{
 		tmp = BreakPoint{
-			defBP_软件执行,1,0,
+			Type,1,0,
 			(DWORD_PTR)Address
 		};
-		buff[0] = 0xCC;
-
-		if (NULL == ReadProcessMemory(gDATA.PS.hProcess,Address , &tmp.OLD, 1, 0))
+		if (NULL == ReadMemory(Address, &tmp.OLD, 1))
 			return 0;
-		bRet = WriteProcessMemory(gDATA.PS.hProcess, Address, buff, 1, 0);
+		bRet = WriteMemory(Address, gszCC, 1) != 0;
+		this->mBreakPoint[Address] = tmp;
+	}
+	return bRet;
+}
+
+BOOL CDebug::AddHardPoint(LPVOID Address, WORD Type)
+{
+	BOOL bRet = false;
+	BreakPoint tmp = this->mBreakPoint[Address];
+	if (tmp.TYPES)
+	{
+		printf("断点已存在：%p", Address);
+		return 0;
+	}
+	else
+	{
+		tmp = BreakPoint{
+			Type,1,0,
+			(DWORD_PTR)Address
+		};
+		
+		//
+		CONTEXT ct = { CONTEXT_DEBUG_REGISTERS };
+		GetThreadContext(gDATA.PS.hThread, &ct);
+		PDBG_REG7 pDr7 = (PDBG_REG7)&ct.Dr7;
+		if (pDr7->L0 == 0) {	//DR0没有被使用
+			ct.Dr0 = (DWORD)Address;
+			pDr7->RW0 = 0;
+			pDr7->LEN0 = 0;
+			pDr7->L0 = 1;		//开启断点
+			bRet = true;
+		}
+		else
+		{
+			MessageBox(gINFO_mWind.hwMFC, L"无可用硬件断点", 0, 0);
+			return 0;
+		}
+		SetThreadContext(gDATA.PS.hThread, &ct);
 		this->mBreakPoint[Address] = tmp;
 	}
 	return bRet;
@@ -216,7 +391,6 @@ BOOL CDebug::AddSoftPoint(LPVOID Address)
 
 DWORD CDebug::SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak)
 {
-	BYTE buff[16] = { 0 };
 	BOOL bRet = false;
 	BreakPoint &tmp = this->mBreakPoint[Address];
 	if (tmp.TYPES == 0)
@@ -237,18 +411,19 @@ DWORD CDebug::SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak)
 		return 0;
 	case 1: {		//暂停
 		//软件断点
-		if (tmp.TYPES == defBP_软件执行) {
-			bRet = WriteProcessMemory(gDATA.PS.hProcess, Address, &tmp.OLD, 1, 0);
-			if (!bRet) {	//还原字节失败
+		if (tmp.TYPES == defBP_软件执行
+			|| tmp.TYPES == defBP_单步步过) {
+			if (!!this->WriteMemory(Address, &tmp.OLD, 1)) {	//还原字节失败
 				printf("写入目标进程%p->%lX 失败\n", Address, tmp.OLD);
 				return 0;
 			}
-			//重新上软件断
-			if (isBreak)
+			if (isBreak == 0)					//单步步过时删除该临时断点
+				tmp.TYPES = defBP_断点暂停;
+			if (isBreak == defBP_断点删除)		//单步步过时删除该临时断点
+				this->mBreakPoint.erase(Address);
+			else if (isBreak == TRUE)			//永久性断点，再次设置CC
 			{
-				buff[0] = 0xCC;
-				bRet = WriteProcessMemory(gDATA.PS.hProcess, Address, buff, 1, 0);
-				if (!bRet)
+				if (!this->WriteMemory(Address,gszCC,1))
 				{
 					printf("写入目标进程%p->INT3 失败\n", Address);
 					return 0;
@@ -259,11 +434,9 @@ DWORD CDebug::SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak)
 			GetThreadContext(gDATA.PS.hThread, &context);
 			context.Eip -= 1;
 			SetThreadContext(gDATA.PS.hThread, &context);
-			tmp.TYPES = defBP_断点暂停;
 		}
 	}break;
-	default:
-		break;
+	default: break;
 	}
 	return bRet;
 }
@@ -274,4 +447,12 @@ SIZE_T CDebug::ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen)
 	if (NULL == ReadProcessMemory(gDATA.PS.hProcess, Address, ReadBuff, ReadLen, &Read))
 		return 0;
 	return Read;
+}
+
+SIZE_T CDebug::WriteMemory(LPVOID Address, LPVOID Buff, DWORD_PTR ReadLen)
+{
+	SIZE_T Len;
+	if (NULL == WriteProcessMemory(gDATA.PS.hProcess, Address, Buff, ReadLen, &Len))
+		return 0;
+	return Len;
 }

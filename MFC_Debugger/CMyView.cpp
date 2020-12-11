@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "CMyView.h"
 
-CMyView::CMyView(CDialogEx* wMain)/*:mDLG_MEM(0)*/
+CMyView::CMyView(CDialogEx* wMain)
+	:mDLG_MEM(0), mLS_Mem(0), mLS_Stack(0)
 {
 	m_StatusBar.Create(WS_CHILD | WS_VISIBLE | SBT_OWNERDRAW, CRect(0, 0, 0, 0), wMain, 0);
 	CRect rect;
@@ -33,10 +34,16 @@ BOOL CMyView::InitView()
 	//::SetWindowText(hWnd, L"等待调试进程建立。");
 
 	//初始化内存子窗口
-	mDLG_MEM = new CDLG_MEM();
-	mDLG_MEM->Create(IDD_DIALOG1, this->mMain);
-	mDLG_MEM->ShowWindow(SW_SHOW);
-
+	if (gINFO_mWind.hwMEM && !::IsWindow(gINFO_mWind.hwMEM))
+		gINFO_mWind.hwMEM = 0;
+	if (gINFO_mWind.hwMEM == 0)
+	{
+		mDLG_MEM = new CDLG_MEM();
+		mDLG_MEM->Create(IDD_DIALOG1, this->mMain);
+		mDLG_MEM->ShowWindow(SW_SHOW);
+		mLS_Mem = (CListCtrl*)mDLG_MEM->GetDlgItem(IDC_LIST1);
+		mLS_Stack = (CListCtrl*)mDLG_MEM->GetDlgItem(IDC_LIST2);
+	}
 	return true;
 }
 
