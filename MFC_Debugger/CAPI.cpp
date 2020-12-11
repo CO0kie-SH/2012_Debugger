@@ -23,8 +23,8 @@ BOOL CAPI::FindWindowByTID(DWORD TID)
 		if (dwTID == TID)
 		{
 			GetClassNameW(hwndWindow, buff, MAX_PATH);
-			std::cout << "TID=" << TID << "==" << dwTID << "\tHWND=0x" <<
-				std::hex << hwndWindow << " " << std::dec << (DWORD)hwndWindow;
+			std::cout << "TID=" << dwTID << "\tHWND=0x" << std::hex <<
+				hwndWindow << " " << std::dec << (DWORD)hwndWindow;
 			printf("ÀàÃû£º%S\n", buff);
 
 			if (wcscmp(buff, L"ConsoleWindowClass") == 0)

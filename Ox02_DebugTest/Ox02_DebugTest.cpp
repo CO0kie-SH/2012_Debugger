@@ -49,5 +49,5 @@ int main()
     std::cout << "Hello World!\n";
     CProInfo1 cInfo;
     show(cInfo);
-    system("PAUSE");
+    getchar();
 }

@@ -9,15 +9,18 @@ CMyView* gcView;
 */
 unsigned __stdcall ThreadProc(PWCHAR Path)
 {
-	CDebug debug;
-	debug.InitDebug(Path);
+	CDebug* debug = new CDebug();
+	gDATA.CDEBUG = debug;
+	debug->InitDebug(Path);
+	delete debug;
+	gDATA.CDEBUG = 0;
 	return 0;
 }
 
 
 #pragma region 类内函数
 CManage::CManage()
-	:m_cConsole(0), m_Main(0)/*, mWind(0)*/
+	:m_cConsole(0), m_Main(0), mh_Debug(0)
 {
 
 }
@@ -49,10 +52,15 @@ void CManage::MenuClick(UINT_PTR nID)
 	switch (nID)
 	{
 	case ID_32771:	//打开文件
-		_beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath, 0, 0);
+		if (gDATA.CDEBUG)
+			break;	//已经存在调试
+		mh_Debug =(HANDLE) _beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath, 0, 0);
 		break;
 	case ID_32775:	//退出
-		break;
+		if (gDATA.CDEBUG) {
+			printf("退出进程%lu,%p：%d\n", gDATA.PS.dwProcessId, gDATA.PS.hProcess,
+				::TerminateProcess(gDATA.PS.hProcess, 0));
+		}break;
 	default: break;
 	}
 }

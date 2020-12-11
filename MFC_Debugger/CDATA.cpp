@@ -8,14 +8,14 @@ CDATA gDATA;
 
 
 
-CDATA::CDATA() :OEP(0)
+CDATA::CDATA() :OEP(0), CDEBUG(0)
 {
 	OutputDebugString(L"CDATA()\n");
 	gINFO_mWind = {
 		GetCurrentProcessId(),
 		GetCurrentThreadId()
 	};
-	ZeroMemory(&this->ps, sizeof(PROCESS_INFORMATION));
+	ZeroMemory(&this->PS, sizeof(PROCESS_INFORMATION));
 }
 
 CDATA::~CDATA()

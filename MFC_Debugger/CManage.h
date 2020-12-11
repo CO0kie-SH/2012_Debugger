@@ -15,6 +15,7 @@ private:
 	CConsole* m_cConsole;
 	CDialogEx* m_Main;
 	//HWND mWind;
+	HANDLE mh_Debug;
 };
 
 extern CManage gcManage;

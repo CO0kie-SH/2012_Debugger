@@ -196,6 +196,7 @@
     <ClInclude Include="MFC_Debugger.h" />
     <ClInclude Include="MFC_DebuggerDlg.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RegStruct.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

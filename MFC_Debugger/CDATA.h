@@ -14,11 +14,21 @@ typedef struct _MAINWIND
 class CDATA
 {
 public:
-	char* OEP;
-	PROCESS_INFORMATION ps;
+	LPVOID OEP;
+	LPVOID CDEBUG;
+	PROCESS_INFORMATION PS;
 public:
 	CDATA();
 	~CDATA();
+
+
+	void SetPS(PROCESS_INFORMATION* ps = 0)
+	{
+		if (ps == 0)
+			ZeroMemory(&this->PS, sizeof(PROCESS_INFORMATION));
+		else
+			memcpy(&this->PS, ps, sizeof(PROCESS_INFORMATION));
+	}
 private:
 };
 

@@ -27,7 +27,7 @@ BOOL CMyView::InitView()
 	::GetWindowRect(this->mWind, &rect);
 
 	//设置控制台
-	::MoveWindow(hWnd, 55, 0, rect.right-rect.left-24, rect.bottom-rect.top - 120, 1);
+	::MoveWindow(hWnd, 0, 55, rect.right-rect.left-24, rect.bottom-rect.top /*- 120*/, 1);
 	::UpdateWindow(hWnd);
 	::SetWindowText(hWnd, L"等待调试进程建立。");
 	return true;

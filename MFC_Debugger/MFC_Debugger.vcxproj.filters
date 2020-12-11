@@ -51,6 +51,9 @@
     <ClInclude Include="CDebug.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="RegStruct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Debugger.cpp">
