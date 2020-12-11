@@ -189,6 +189,7 @@
     <ClInclude Include="CAPI.h" />
     <ClInclude Include="CConsole.h" />
     <ClInclude Include="CDATA.h" />
+    <ClInclude Include="CDebug.h" />
     <ClInclude Include="CManage.h" />
     <ClInclude Include="CMyView.h" />
     <ClInclude Include="framework.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="CAPI.cpp" />
     <ClCompile Include="CConsole.cpp" />
     <ClCompile Include="CDATA.cpp" />
+    <ClCompile Include="CDebug.cpp" />
     <ClCompile Include="CManage.cpp" />
     <ClCompile Include="CMyView.cpp" />
     <ClCompile Include="MFC_Debugger.cpp" />

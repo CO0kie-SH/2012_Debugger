@@ -13,3 +13,4 @@ public:
 };
 
 extern CAPI gAPI;
+extern CString jstr;

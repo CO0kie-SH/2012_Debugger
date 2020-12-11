@@ -1,4 +1,5 @@
 #pragma once
+#define FilePath L"..\\Debug\\Ox02_DebugTest.exe"
 
 typedef struct _MAINWIND
 {
@@ -9,16 +10,18 @@ typedef struct _MAINWIND
 }MAINWIND, * LPMAINWIND;
 
 
-extern MAINWIND gINFO_mWind;
 
 class CDATA
 {
 public:
+	char* OEP;
+	PROCESS_INFORMATION ps;
+public:
 	CDATA();
 	~CDATA();
-
 private:
-
 };
 
+
+extern MAINWIND gINFO_mWind;
 extern CDATA gDATA;

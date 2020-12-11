@@ -67,7 +67,9 @@ BEGIN_MESSAGE_MAP(CMFCDebuggerDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_COMMAND(ID_32771, &CMFCDebuggerDlg::On32771)
+//	ON_COMMAND(ID_32771, &CMFCDebuggerDlg::On32771)
+	ON_COMMAND_RANGE(ID_32771, ID_32775, &CMFCDebuggerDlg::OnMenuClick)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -103,7 +105,8 @@ BOOL CMFCDebuggerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	gcManage.InitManage(this);
+	if (gcManage.InitManage(this))
+		SetTimer(1, 1, NULL);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -158,8 +161,38 @@ HCURSOR CMFCDebuggerDlg::OnQueryDragIcon()
 
 
 
-void CMFCDebuggerDlg::On32771()
+//void CMFCDebuggerDlg::On32771()
+//{
+//	// TODO: 在此添加命令处理程序代码
+//	OutputDebugString(L"菜单->文件->打开\n");
+//	//::ShowWindow(gINFO_mWind.hwCON, SW_HIDE);
+//	//::ShowWindow(gINFO_mWind.hwCON, SW_MAXIMIZE);
+//	//::SetWindowLong(gINFO_mWind.hwCON, GWL_EXSTYLE, 0);
+//	//LONG wndStyle = ::GetWindowLong(gINFO_mWind.hwCON, GWL_STYLE);
+//	//wndStyle &=  ~WS_BORDER;
+//	//wndStyle &=  ~WS_THICKFRAME;
+//}
+
+void CMFCDebuggerDlg::OnMenuClick(UINT_PTR nID)
 {
-	// TODO: 在此添加命令处理程序代码
-	OutputDebugString(L"菜单->文件->打开\n");
+	gcManage.MenuClick(nID);
+}
+
+
+void CMFCDebuggerDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	static BOOL isFirst = true;
+	if (isFirst)
+	{
+		SetTimer(1, 1000, NULL);
+		isFirst = false;
+		gcView->InitView();
+	}
+	else
+	{
+		//gcManage.Timer(nIDEvent);
+		gcView->SetTime();
+	}
+	CDialogEx::OnTimer(nIDEvent);
 }

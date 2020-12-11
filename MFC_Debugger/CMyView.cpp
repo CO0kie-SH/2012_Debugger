@@ -12,9 +12,30 @@ CMyView::CMyView(CDialogEx* wMain)
 	m_StatusBar.SetText(L"就绪", 0, 0);
 	m_StatusBar.SetText(L"当前范围", 1, 0);
 	m_StatusBar.SetText(L"时间", 2, 0);
-    //下面是在状态栏中加入图标
+	this->mMain = wMain;
+	this->mWind = wMain->GetSafeHwnd();
 }
 
 CMyView::~CMyView()
 {
+}
+
+BOOL CMyView::InitView()
+{
+	RECT rect;
+	HWND hWnd = gINFO_mWind.hwCON;
+	::GetWindowRect(this->mWind, &rect);
+
+	//设置控制台
+	::MoveWindow(hWnd, 55, 0, rect.right-rect.left-24, rect.bottom-rect.top - 120, 1);
+	::UpdateWindow(hWnd);
+	::SetWindowText(hWnd, L"等待调试进程建立。");
+	return true;
+}
+
+void CMyView::SetTime()
+{
+	t = CTime::GetCurrentTime();
+	mstr.Format(L"%04d/%02d/%02d  %02d:%02d:%02d", t.GetYear(), t.GetMonth(), t.GetDay(), t.GetHour(), t.GetMinute(), t.GetSecond());
+	m_StatusBar.SetText(mstr, 2, 0);
 }
