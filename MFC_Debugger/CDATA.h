@@ -7,6 +7,7 @@ typedef struct _MAINWIND
 	DWORD	wTID;
 	HWND	hwMFC;
 	HWND	hwCON;
+	HWND	hwOld;
 }MAINWIND, * LPMAINWIND;
 
 

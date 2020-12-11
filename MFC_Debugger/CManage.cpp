@@ -22,11 +22,20 @@ unsigned __stdcall ThreadProc(PWCHAR Path)
 CManage::CManage()
 	:m_cConsole(0), m_Main(0), mh_Debug(0)
 {
-
+	
 }
 
 CManage::~CManage()
 {
+	OutputDebugString(L"~CManage()\n");
+	
+	//关闭调试器
+	if (gDATA.CDEBUG)
+	{
+		this->MenuClick(ID_32775);
+		WaitForSingleObject(this->mh_Debug, 1000);
+	}
+	//关闭控制台
 	delete m_cConsole;
 	delete gcView;
 }

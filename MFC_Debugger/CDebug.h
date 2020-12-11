@@ -20,8 +20,13 @@ class CDebug
 private:
 	map<LPVOID, BreakPoint> mBreakPoint;
 public:
+	CDebug()
+	{
+		OutputDebugString(L"CDebug()\n");
+	}
 	~CDebug()
 	{
+		OutputDebugString(L"~CDebug()\n");
 		gDATA.SetPS();
 		puts("调试者线程结束。");
 	}

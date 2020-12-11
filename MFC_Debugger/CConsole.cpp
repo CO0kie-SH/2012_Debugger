@@ -40,6 +40,7 @@ CConsole::CConsole()
 
 CConsole::~CConsole()
 {
+	OutputDebugString(L"~CConsole()\n");
 	//std::cout << "控制台将关闭\n";
 	FreeConsole();
 }

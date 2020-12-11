@@ -20,4 +20,5 @@ CDATA::CDATA() :OEP(0), CDEBUG(0)
 
 CDATA::~CDATA()
 {
+	OutputDebugString(L"~CDATA()\n");
 }
