@@ -18,6 +18,16 @@ using std::map;
 #define defBP_内存暂停 13
 #define defBP_内存属性 14
 #define defBP_内存复写 15
+#define defBP_内存删除 16
+
+enum EM_BUG_NUM
+{
+	BUG_1,
+	BUG_2,
+	BUG_3,
+	BUG_4,
+	BUG_内存异常错误
+};
 
 constexpr LPVOID gszCC = "\xCC\xCC";
 constexpr PWCHAR gszBP[] = {
@@ -32,6 +42,7 @@ constexpr PWCHAR gszBP[] = {
 	L"硬件暂停",
 	L"内存执行",
 	L"内存写入",
+	L"内存读取",
 	L"内存读写",
 	L"内存暂停",
 	L"内存属性",
@@ -67,6 +78,7 @@ class CMyPoint
 public:
 	WaitPoint mWait;
 	map<LPVOID, BreakPoint> mBreakPoint;
+	LPBreakPoint MemyPoint;
 public:
 	CMyPoint()
 	{
@@ -74,14 +86,14 @@ public:
 	}
 	//增加软件断点
 	BOOL AddSoftPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
-	//设置内存断点
-	BOOL SetMemPoint(LPBreakPoint pPoint);
-	//重设软件断点
-	BOOL ReSetSoftPoint(LPBreakPoint pPoint);
 	//添加硬件断点
 	BOOL AddHardPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
-	//添加软件断点
+	//设置内存断点
 	BOOL AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
+	//重设软件断点
+	BOOL ReSetSoftPoint(LPBreakPoint pPoint);
+	//重设内存断点
+	BOOL SetMemPoint(LPVOID Address, BOOL isRe = 0);
 
 	SIZE_T ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen);
 

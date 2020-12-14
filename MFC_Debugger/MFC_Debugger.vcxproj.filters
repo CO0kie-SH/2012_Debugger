@@ -19,6 +19,9 @@
     <Filter Include="C调试器处理">
       <UniqueIdentifier>{295ef6df-c086-4ef3-bc35-b8526bbba5a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C依赖">
+      <UniqueIdentifier>{876dcca5-fb4c-40cf-8f5f-2e36f3b1f20b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MFC_Debugger.h">
@@ -66,6 +69,9 @@
     <ClInclude Include="CMyPoint.h">
       <Filter>C调试器处理</Filter>
     </ClInclude>
+    <ClInclude Include="CPE.h">
+      <Filter>C依赖</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Debugger.cpp">
@@ -101,6 +107,9 @@
     <ClCompile Include="CMyPoint.cpp">
       <Filter>C调试器处理</Filter>
     </ClCompile>
+    <ClCompile Include="CPE.cpp">
+      <Filter>C依赖</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MFCDebugger.rc">
@@ -111,6 +120,7 @@
     <None Include="res\MFCDebugger.rc2">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MFC_Debugger.ico">

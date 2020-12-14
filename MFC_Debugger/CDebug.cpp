@@ -73,8 +73,8 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 			printf("进程创建事件触发,OEP=%p\n", gDATA.OEP);
 			this->DisASM(gDATA.OEP, 5);
 			//printf("增加OEP硬件断点=%d\n", this->AddHardPoint(gDATA.OEP, defBP_硬件执行));
-			//printf("增加OEP软件断点=%d\n", this->AddSoftPoint(gDATA.OEP, defBP_软件执行, L"OEP入口"));
-			printf("增加OEP内存断点=%d\n", this->AddMemPoint(gDATA.OEP, defBP_内存执行, L"OEP入口"));
+			printf("增加OEP软件断点=%d\n", this->AddSoftPoint(gDATA.OEP, defBP_软件执行, L"OEP入口"));
+			//printf("增加OEP内存断点=%d\n", this->AddMemPoint(gDATA.OEP, defBP_内存执行, L"OEP入口"));
 		}break;
 		case EXIT_THREAD_DEBUG_EVENT:   // 退出线程事件
 			printf("线程退出事件触发\n");
@@ -197,19 +197,18 @@ DWORD CDebug::OnException_SingleStep(LPVOID Address, LPDEBUG_EVENT pDbg_event)
 	bool isASM = true, isWait = true, isRet = false, isNULL = false;
 	BreakPoint& tmp = this->mBreakPoint[Address];
 	//判断是否为永久断点断下
-	if (this->mWait.SoftPoint)			//如果有永久标志
+	if (this->mWait.SoftPoint)			//如果有软件标志
 	{
 		
 		printf("\n\t检测到软件断点复写，再次写入CC\n");
 		if (NULL == this->WriteMemory(					//则还原指令
-			this->mWait.SoftPoint->Address,
-			&this->mWait.SoftPoint->OLD, 1))
+			this->mWait.SoftPoint->Address, gszCC, 1))
 			return this->Bug(2);
 		this->mWait.SoftPoint->TYPES = defBP_软件执行;
 		this->mWait.SoftPoint = 0;
 		isRet = true;
 	}
-	if (this->mWait.HardPoint)			//如果有永久硬件标志
+	if (this->mWait.HardPoint)			//如果有硬件标志
 	{
 		printf("\n\t检测到硬件断点%p->%lu复写，再次启用\n",
 			this->mWait.HardPoint->Address, this->mWait.HardPoint->OLD);
@@ -217,11 +216,14 @@ DWORD CDebug::OnException_SingleStep(LPVOID Address, LPDEBUG_EVENT pDbg_event)
 		this->mWait.HardPoint = 0;
 		isRet = true;
 	}
-	if (this->mWait.MemyPoint)
+	if (this->mWait.MemyPoint)			//如果有内存标志
 	{
-		if (!this->SetMemPoint(this->mWait.MemyPoint))
-			this->Bug(6);
-		this->mWait.MemyPoint = 0;
+		DWORD_PTR dwAdd = (DWORD_PTR)
+			this->mWait.MemyPoint->Address;
+		printf("\n\t遇到内存重写0x%lX\n", dwAdd);
+		dwAdd /= 0x1000;
+		dwAdd *= 0x1000;
+		this->SetMemPoint((LPVOID)dwAdd);
 		isRet = true;
 	}
 
@@ -255,29 +257,62 @@ DWORD CDebug::OnException_SingleStep(LPVOID Address, LPDEBUG_EVENT pDbg_event)
 DWORD CDebug::OnException_MemPoint(LPVOID Address, LPDEBUG_EVENT pDbg_event)
 {
 	bool isASM = true, isWait = true, isRet = false, isNULL = false;
-	BreakPoint& tmp = this->mBreakPoint[Address];
-	if (tmp.TYPES == defBP_内存属性)	//无此断点
-	{
-		printf("\n\t检测到内存异常,%p", Address);
-		//this->mWait.PassPoint = FALSE;
-		//this->mWait.LineShow = "已经单步断下，请继续：";
-	}
-	else if (tmp.OLD)
-	{
-		DWORD dwtmp;
-		printf("\n\t检测到内存断点");
-		VirtualProtectEx(gDATA.PS.hProcess, Address, 1, tmp.OLD, &dwtmp);
-		//this->mWait.MemyPoint = &tmp;
-		//this->SetTFPoint(0);
-	}
-	else if (Address == (LPVOID)0x401072)
+	DWORD dwAdd = (DWORD)Address / 0x1000, dwtmp;
+	dwAdd *= 0x1000;
+	auto end = this->mBreakPoint.find((LPVOID)dwAdd);
+
+	if (Address == (LPVOID)0x401072)
 	{
 		printf("\n\t检测到SEH处理，跳过\n");
 		return DBG_EXCEPTION_NOT_HANDLED;
 	}
-	else
-		this->Bug(4);
-
+	int errINFO = pDbg_event->u.Exception.
+		ExceptionRecord.ExceptionInformation[0];
+	printf("\n\t内存%s错误", errINFO == 0 ? "读取" :
+		(errINFO == 1 ? "写入" : (errINFO == 8 ? "执行" : "未知")));
+	switch (this->MemyPoint->TYPES)
+	{
+	case defBP_内存写入:
+		if (errINFO == 1)
+		{
+			printf("【命中】");
+			this->mWait.MemyPoint = this->MemyPoint;
+			this->SetTFPoint(0);
+		}break;
+	case defBP_内存读取:
+		if (errINFO == 0)
+		{
+			printf("【命中】");
+		}
+		else
+		{
+			printf("【未命中】");
+			isASM = 0; isWait = 0;
+		}
+		this->mWait.MemyPoint = this->MemyPoint;
+		this->SetTFPoint(0);
+		break;
+	case defBP_内存执行:
+		if (errINFO == 8 &&
+			this->MemyPoint->Address == Address)
+		{
+			printf("【命中】");
+		}
+		else
+		{
+			printf("【未命中】");
+			isASM = 0; isWait = 0;
+		}
+		this->mWait.MemyPoint = this->MemyPoint;
+		this->SetTFPoint(0);
+		break;
+	default:
+		break;
+	}
+	VirtualProtectEx(
+		gDATA.PS.hProcess,
+		this->MemyPoint->Address, 1,
+		this->MemyPoint->OLD, &dwtmp);
 
 	if (isASM)
 		this->DisASM(Address, 5);
@@ -293,8 +328,9 @@ DWORD CDebug::OnLine()
 	DWORD address;
 	while (true)
 	{
-		if (this->mWait.LineShow)
-			std::cout << this->mWait.LineShow;
+		if (!this->mWait.LineShow)
+			this->mWait.LineShow = "请继续：";
+		std::cout << this->mWait.LineShow;
 		// 获取命令
 		gets_s(cmdline, 200); // bp 0x3333333
 
@@ -350,6 +386,20 @@ DWORD CDebug::OnLine()
 				this->DisASM((LPVOID)context.Eip, 5);
 				break;
 			}
+			else if (strcmp(cmd, "r") == 0)
+			{
+				std::cout << "\n\t寄存器信息如下\n";
+				this->ShowRegister();
+				this->mWait.LineShow = 0;
+				continue;
+			}
+			else if (strcmp(cmd, "lm") == 0)
+			{
+				std::cout << "\n\t模块信息如下\n";
+				this->ShowDlls();
+				this->mWait.LineShow = 0;
+				continue;
+			}
 			else if (strcmp(cmd, "ba") == 0)
 			{
 				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
@@ -377,6 +427,15 @@ DWORD CDebug::OnLine()
 						this->mWait.LineShow = cmd;
 						break;
 					}
+					else if (strcmp(cmdline, "r") == 0)
+					{
+						// 设置硬件写入断点
+						wsprintfA(cmd, "设置断点0x%lX %s，请继续：", address,
+							this->AddHardPoint((LPVOID)address, defBP_硬件读写) ?
+							"成功" : "失败");
+						this->mWait.LineShow = cmd;
+						break;
+					}
 				}
 				printf("\n");
 			}
@@ -394,6 +453,24 @@ DWORD CDebug::OnLine()
 						// 设置软件执行断点
 						wsprintfA(cmd, "设置断点0x%lX %s，请继续：", address,
 							this->AddMemPoint((LPVOID)address, defBP_内存执行) ?
+							"成功" : "失败");
+						this->mWait.LineShow = cmd;
+						break;
+					}
+					else if (strcmp(cmdline, "w") == 0)
+					{
+						// 设置软件执行断点
+						wsprintfA(cmd, "设置断点0x%lX %s，请继续：", address,
+							this->AddMemPoint((LPVOID)address, defBP_内存写入) ?
+							"成功" : "失败");
+						this->mWait.LineShow = cmd;
+						break;
+					}
+					else if (strcmp(cmdline, "r") == 0)
+					{
+						// 设置软件执行断点
+						wsprintfA(cmd, "设置断点0x%lX %s，请继续：", address,
+							this->AddMemPoint((LPVOID)address, defBP_内存读取) ?
 							"成功" : "失败");
 						this->mWait.LineShow = cmd;
 						break;
@@ -480,29 +557,6 @@ DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 	cs_close(&handle);
 	return 0;
 }
-
-//BOOL CDebug::AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text/* = 0*/)
-//{
-//	BOOL bRet = 0;
-//	BreakPoint tmp = this->mBreakPoint[Address];
-//	if (tmp.TYPES)
-//	{
-//		printf("断点已存在：%p", Address);
-//		return 0;
-//	}
-//	else if (Type == defBP_内存执行)
-//	{
-//		tmp = BreakPoint{ Type,1,0,0,Address };
-//		if (Text)
-//			tmp.str = Text;
-//		bRet = VirtualProtectEx(gDATA.PS.hProcess, Address, 1, PAGE_READWRITE, &tmp.OLD);
-//		this->mBreakPoint[Address] = tmp;
-//		//DWORD_PTR MemFitst = (DWORD_PTR)Address / 1000;
-//		//MemFitst *= 1000;
-//		//this->mBreakPoint[(LPVOID)MemFitst] = { defBP_内存属性,1,tmp.OLD,0,Address };
-//	}
-//	return bRet;
-//}
 
 DWORD CDebug::SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak)
 {
@@ -602,6 +656,55 @@ BOOL CDebug::SetTFPoint(BOOL isSetFlag/* = TRUE*/)
 	((PEFLAGS)&context.EFlags)->TF = 1;
 	// 设置线程上下文
 	return SetThreadContext(gDATA.PS.hThread, &context);
+}
+
+void CDebug::ShowRegister()
+{
+	CONTEXT context = { CONTEXT_FULL };
+	// 获取线程上下文
+	GetThreadContext(gDATA.PS.hThread, &context);
+	DWORD mem = context.Esp, end = context.Ebp + 4, max = end - mem;
+	BYTE* buff = new BYTE[max];
+	this->ReadMemory((LPVOID)mem, buff, max);
+	printf("ESP=0x%08lX\tEBP=0x%08lX\n", mem, end - 4);
+	for (DWORD i = 0, *p = (PDWORD)buff; i < max; p++)
+	{
+		printf("地址：0x%lX\t", mem + i);
+		for (BYTE j = 4; j--; )
+		{
+			printf("%02X ", buff[i++]);
+		}
+		printf("|四字节：0x%08lX\n", *p);
+	}
+	delete[] buff;
+}
+
+void CDebug::ShowDlls(BYTE* Address)
+{
+	HANDLE hToolHelp = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, gDATA.PS.dwProcessId);
+	if (hToolHelp == INVALID_HANDLE_VALUE)	return;
+	//结构体[模块信息][tagMODULEENTRY32W]说明
+/*
+typedef struct tagMODULEENTRY32W
+{
+	DWORD   th32ProcessID;      // 所属进程ID
+	BYTE  * modBaseAddr;        // 模块的加载基地址
+	DWORD   modBaseSize;        // 模块的大小
+	HMODULE hModule;            // 模块的句柄(加载基址)
+	WCHAR   szModule[MAX_MODULE_NAME32 + 1];	// 模块名
+	WCHAR   szExePath[MAX_PATH];				// 所在路径
+} MODULEENTRY32W;
+	*/
+	MODULEENTRY32 info = { sizeof(MODULEENTRY32) };
+	if (Module32First(hToolHelp, &info))
+	{
+		do {
+			printf("模块0x%p\t大小0x%08X\t%15S\t%S\n",
+				info.modBaseAddr, info.modBaseSize, info.szModule, info.szExePath);
+		} while (Module32Next(hToolHelp, &info));
+	}
+	CloseHandle(hToolHelp);
+	return;
 }
 
 

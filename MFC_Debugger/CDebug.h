@@ -1,4 +1,6 @@
 #pragma once
+#include <psapi.h>
+#include <tlhelp32.h>
 #include "CMyPoint.h"
 
 
@@ -32,8 +34,6 @@ public:
 	
 	//反汇编
 	DWORD DisASM(LPVOID Address, DWORD ReadLen);
-	//增加软件断点
-	//BOOL AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
 
 
 	// 软件断点处理函数
@@ -42,5 +42,7 @@ public:
 	DWORD SetHardPoint(LPBreakPoint Point, WORD Type, BOOL isBreak);
 
 	BOOL SetTFPoint(BOOL isSetFlag = TRUE);
+	void ShowRegister();
+	void ShowDlls(BYTE* Address = 0);
 };
 

@@ -194,6 +194,7 @@
     <ClInclude Include="CManage.h" />
     <ClInclude Include="CMyPoint.h" />
     <ClInclude Include="CMyView.h" />
+    <ClInclude Include="CPE.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MFC_Debugger.h" />
     <ClInclude Include="MFC_DebuggerDlg.h" />
@@ -211,6 +212,7 @@
     <ClCompile Include="CManage.cpp" />
     <ClCompile Include="CMyPoint.cpp" />
     <ClCompile Include="CMyView.cpp" />
+    <ClCompile Include="CPE.cpp" />
     <ClCompile Include="MFC_Debugger.cpp" />
     <ClCompile Include="MFC_DebuggerDlg.cpp" />
     <ClCompile Include="pch.cpp">
@@ -224,6 +226,7 @@
     <ResourceCompile Include="MFCDebugger.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="res\MFCDebugger.rc2" />
   </ItemGroup>
   <ItemGroup>

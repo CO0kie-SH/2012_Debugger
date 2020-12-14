@@ -25,20 +25,20 @@ BOOL CMyPoint::AddSoftPoint(LPVOID Address, WORD Type, PWCHAR Text)
 	return 0;
 }
 
-BOOL CMyPoint::SetMemPoint(LPBreakPoint pPoint)
-{
-	BOOL bRet = 0;
-	DWORD dwSet = PAGE_NOACCESS;
-	switch (pPoint->TYPES)
-	{
-	case defBP_内存执行:
-		//dwSet = PAGE_READWRITE;
-		break;
-	default:
-		break;
-	}
-	return VirtualProtectEx(gDATA.PS.hProcess, pPoint->Address, 1, dwSet, &pPoint->OLD);
-}
+//BOOL CMyPoint::SetMemPoint(LPBreakPoint pPoint)
+//{
+//	BOOL bRet = 0;
+//	DWORD dwSet = PAGE_NOACCESS;
+//	switch (pPoint->TYPES)
+//	{
+//	case defBP_内存执行:
+//		//dwSet = PAGE_READWRITE;
+//		break;
+//	default:
+//		break;
+//	}
+//	return VirtualProtectEx(gDATA.PS.hProcess, pPoint->Address, 1, dwSet, &pPoint->OLD);
+//}
 
 BOOL CMyPoint::ReSetSoftPoint(LPBreakPoint pPoint)
 {
@@ -54,6 +54,7 @@ BOOL CMyPoint::ReSetSoftPoint(LPBreakPoint pPoint)
 	}
 	return bRet;
 }
+
 
 BOOL CMyPoint::AddHardPoint(LPVOID Address, WORD Type, PWCHAR Text)
 {
@@ -78,11 +79,11 @@ BOOL CMyPoint::AddHardPoint(LPVOID Address, WORD Type, PWCHAR Text)
 		bLen = 0;
 		break;
 	case defBP_硬件写入:
-		bType = 0;
+		bType = 1;
 		bLen = 1;
 		break;
 	case defBP_硬件读写:
-		bType = 0;
+		bType = 3;
 		bLen = 1;
 		break;
 	default:
@@ -141,27 +142,49 @@ BOOL CMyPoint::AddHardPoint(LPVOID Address, WORD Type, PWCHAR Text)
 
 BOOL CMyPoint::AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text)
 {
-
-	BOOL bRet = 0, bpD7 = 0, bType = 0, bLen = 0;
-	BreakPoint tmp = this->mBreakPoint[Address];
-	if (tmp.TYPES)
+	DWORD_PTR dwAdd = (DWORD_PTR)Address / 0x1000;
+	dwAdd *= 0x1000;
+	if (this->MemyPoint)
 	{
-		printf("断点已存在：%p", Address);
+		printf("\n\t断点已存在：%p\n", Address);
 		return 0;
 	}
-	else if (Type == defBP_内存执行)
-	{
-		tmp = BreakPoint{ Type,1,0,0,Address };
-		if (this->SetMemPoint(&tmp))
-		{
-			if (Text)		//如果有备注，则加备注
-				tmp.str = Text;
-			this->mBreakPoint[Address] = tmp;
-			BreakPoint tmp2 = BreakPoint{ defBP_内存属性,1 };
+	this->mBreakPoint[(LPVOID)dwAdd] = { Type,1,0,0,Address };
+	return this->SetMemPoint((LPVOID)dwAdd);
+}
 
-			bRet = TRUE;
-		}
+BOOL CMyPoint::SetMemPoint(LPVOID Address, BOOL isRe/* = 0*/)
+{
+	BOOL bRet = 0, bSet = PAGE_NOACCESS;
+	BreakPoint& tmp = this->mBreakPoint[Address];
+
+	//通过内存属性修改变量
+	switch (tmp.TYPES)
+	{
+	case defBP_内存写入: 
+		bSet = PAGE_EXECUTE_READ; break;
+	case defBP_内存读取: 
+		bSet = PAGE_NOACCESS; break;
+	case defBP_内存执行: 
+		bSet = PAGE_NOACCESS; break;
+	default:
+		printf("联系作者添加功能。\n");
+		this->Bug(BUG_内存异常错误);
+		break;
 	}
+	if (tmp.STATU == defBP_断点删除 ||
+		tmp.STATU == defBP_内存暂停) {
+		bSet = tmp.OLD;
+	}
+	bRet = VirtualProtectEx(
+		gDATA.PS.hProcess, Address, 1, bSet, &tmp.OLD);
+	if (!bRet || tmp.STATU == defBP_断点删除)
+	{
+		this->mBreakPoint.erase(Address);
+		this->MemyPoint = 0;
+	}
+	else
+		this->MemyPoint = &tmp;
 	return bRet;
 }
 
