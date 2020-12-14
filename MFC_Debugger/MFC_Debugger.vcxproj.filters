@@ -63,6 +63,9 @@
     <ClInclude Include="CDebug.h">
       <Filter>C调试器处理</Filter>
     </ClInclude>
+    <ClInclude Include="CMyPoint.h">
+      <Filter>C调试器处理</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Debugger.cpp">
@@ -93,6 +96,9 @@
       <Filter>C调试器框架</Filter>
     </ClCompile>
     <ClCompile Include="CDebug.cpp">
+      <Filter>C调试器处理</Filter>
+    </ClCompile>
+    <ClCompile Include="CMyPoint.cpp">
       <Filter>C调试器处理</Filter>
     </ClCompile>
   </ItemGroup>

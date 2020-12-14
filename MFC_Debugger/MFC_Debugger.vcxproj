@@ -192,6 +192,7 @@
     <ClInclude Include="CDebug.h" />
     <ClInclude Include="CDLG_MEM.h" />
     <ClInclude Include="CManage.h" />
+    <ClInclude Include="CMyPoint.h" />
     <ClInclude Include="CMyView.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MFC_Debugger.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="CDebug.cpp" />
     <ClCompile Include="CDLG_MEM.cpp" />
     <ClCompile Include="CManage.cpp" />
+    <ClCompile Include="CMyPoint.cpp" />
     <ClCompile Include="CMyView.cpp" />
     <ClCompile Include="MFC_Debugger.cpp" />
     <ClCompile Include="MFC_DebuggerDlg.cpp" />
