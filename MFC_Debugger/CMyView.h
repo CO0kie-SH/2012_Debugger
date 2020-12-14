@@ -2,6 +2,15 @@
 #include "resource.h"
 #include "CDLG_MEM.h"
 
+
+#define defNum_MAX_断点 7
+constexpr PWCHAR gszBreakPoring[] =
+{
+	L"摘要",L"命中",L"反汇编",L"状态",
+	L"模块/标签/异常",L"地址",L"类型"
+};
+
+
 class CMyView
 {
 public:
@@ -10,14 +19,16 @@ public:
 
 	BOOL InitView();
 	void SetTime();
+	
 private:
 	HWND mh_Wind;
 	//控件指针
-	CDialogEx* mMain;
-	CDLG_MEM* mDLG_MEM;
-	CListCtrl* mLS_Mem;
-	CListCtrl* mLS_Stack;
-
+	CDialogEx*	mMain;
+	CDLG_MEM*	mDLG_MEM;
+	CListCtrl*	mLS_Mem;
+	CListCtrl*	mLS_Stack;
+	CListCtrl*	mLS_Main;
+	int mSecond;
 
 	//创建临时对象
 	CString mstr;

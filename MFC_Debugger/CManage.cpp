@@ -9,22 +9,15 @@ CMyView* gcView;
 */
 unsigned __stdcall ThreadProc(PWCHAR Path)
 {
-	CDebug* debug = new CDebug();
-	gDATA.CDEBUG = debug;
-	debug->InitDebug(Path);
-	delete debug;
+	CDebug debug;
+	gDATA.CDEBUG = &debug;
+	debug.InitDebug(Path);
 	gDATA.CDEBUG = 0;
 	return 0;
 }
 
 
 #pragma region 类内函数
-CManage::CManage()
-	:m_cConsole(0), m_Main(0), mh_Debug(0)
-{
-	
-}
-
 CManage::~CManage()
 {
 	OutputDebugString(L"~CManage()\n");
@@ -32,7 +25,7 @@ CManage::~CManage()
 	if (gDATA.CDEBUG)
 	{
 		this->MenuClick(ID_32775);
-		WaitForSingleObject(this->mh_Debug, 1000);
+		WaitForSingleObject(this->mh_Debug, 9000);
 	}
 	//关闭控制台
 	delete m_cConsole;
@@ -74,6 +67,14 @@ void CManage::MenuClick(UINT_PTR nID)
 				::TerminateProcess(gDATA.PS.hProcess, 0));
 		}break;
 	default: break;
+	}
+}
+
+void CManage::TabClick(int nID)
+{
+	if (nID == 4) //断点管理
+	{
+
 	}
 }
 #pragma endregion

@@ -2,7 +2,7 @@
 #include "CMyView.h"
 
 CMyView::CMyView(CDialogEx* wMain)
-	:mDLG_MEM(0), mLS_Mem(0), mLS_Stack(0)
+	:mDLG_MEM(0), mLS_Mem(0), mLS_Stack(0), mSecond(0)
 {
 	m_StatusBar.Create(WS_CHILD | WS_VISIBLE | SBT_OWNERDRAW, CRect(0, 0, 0, 0), wMain, 0);
 	CRect rect;
@@ -15,6 +15,12 @@ CMyView::CMyView(CDialogEx* wMain)
 	m_StatusBar.SetText(L"Ê±¼ä", 2, 0);
 	this->mMain = wMain;
 	this->mh_Wind = wMain->GetSafeHwnd();
+
+	mLS_Main = (CListCtrl*)wMain->GetDlgItem(IDC_LISTM1);
+	for (int i = 0; i < defNum_MAX_¶Ïµã; i++)
+	{
+		mLS_Main->InsertColumn(0, gszBreakPoring[i], 100, 150);
+	}
 }
 
 CMyView::~CMyView()
@@ -38,11 +44,13 @@ BOOL CMyView::InitView()
 		gINFO_mWind.hwMEM = 0;
 	if (gINFO_mWind.hwMEM == 0)
 	{
-		mDLG_MEM = new CDLG_MEM();
-		mDLG_MEM->Create(IDD_DIALOG1, this->mMain);
-		mDLG_MEM->ShowWindow(SW_SHOW);
-		mLS_Mem = (CListCtrl*)mDLG_MEM->GetDlgItem(IDC_LIST1);
-		mLS_Stack = (CListCtrl*)mDLG_MEM->GetDlgItem(IDC_LIST2);
+		//mDLG_MEM = new CDLG_MEM();
+		//mDLG_MEM->Create(IDD_DIALOG1, this->mMain);
+		//mDLG_MEM->ShowWindow(SW_SHOW);
+		//mLS_Mem = (CListCtrl*)mDLG_MEM->GetDlgItem(IDC_LIST1);
+		//mLS_Stack = (CListCtrl*)mDLG_MEM->GetDlgItem(IDC_LIST2);
+
+		//mLS_Mem->InsertItem(0, L"0x0080D000");
 	}
 	return true;
 }
@@ -50,6 +58,20 @@ BOOL CMyView::InitView()
 void CMyView::SetTime()
 {
 	t = CTime::GetCurrentTime();
-	mstr.Format(L"%04d/%02d/%02d  %02d:%02d:%02d", t.GetYear(), t.GetMonth(), t.GetDay(), t.GetHour(), t.GetMinute(), t.GetSecond());
-	m_StatusBar.SetText(mstr, 2, 0);
+	int second = t.GetSecond();
+	if (this->mSecond != second)
+	{
+		this->mSecond = second;
+		mstr.Format(L"%04d/%02d/%02d  %02d:%02d:%02d",
+			t.GetYear(), t.GetMonth(), t.GetDay(), t.GetHour(), t.GetMinute(), second);
+		m_StatusBar.SetText(mstr, 2, 0);
+	}
+	if (gDATA.CDEBUG)
+	{
+		DWORD i;
+		if (this->mLS_Mem && ReadProcessMemory(gDATA.PS.hProcess, (LPVOID)0x0080D000, &i, 4, 0)) {
+			mstr.Format(L"%lu", i);
+			this->mLS_Mem->SetItemText(0, 1, mstr);
+		}
+	}
 }

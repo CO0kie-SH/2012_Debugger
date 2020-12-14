@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="C调试器框架">
+      <UniqueIdentifier>{aa0fc70e-47fa-4f3e-afd0-3e95448f7061}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C调试器处理">
+      <UniqueIdentifier>{295ef6df-c086-4ef3-bc35-b8526bbba5a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MFC_Debugger.h">
@@ -33,9 +39,6 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CManage.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="CConsole.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -43,9 +46,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CDATA.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CMyView.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CDebug.h">
@@ -56,6 +56,12 @@
     </ClInclude>
     <ClInclude Include="CDLG_MEM.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CMyView.h">
+      <Filter>C调试器框架</Filter>
+    </ClInclude>
+    <ClInclude Include="CManage.h">
+      <Filter>C调试器框架</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -68,9 +74,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CManage.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CConsole.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -80,14 +83,17 @@
     <ClCompile Include="CDATA.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CMyView.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CDebug.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CDLG_MEM.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CMyView.cpp">
+      <Filter>C调试器框架</Filter>
+    </ClCompile>
+    <ClCompile Include="CManage.cpp">
+      <Filter>C调试器框架</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

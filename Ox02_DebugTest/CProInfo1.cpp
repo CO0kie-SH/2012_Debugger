@@ -32,8 +32,6 @@ CProInfo1::CProInfo1()
 	//	gNtQueryInformationProcess = (pfnNtQueryInformationProcess)
 	//		GetProcAddress(ghNtDll, "NtQueryInformationProcess");
 	//}
-
-
 }
 
 BOOL CProInfo1::IsBeginDebuged()
