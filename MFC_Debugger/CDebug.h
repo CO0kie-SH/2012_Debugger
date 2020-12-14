@@ -20,6 +20,23 @@ using std::map;
 #define defBP_内存复写 15
 
 constexpr LPVOID gszCC = "\xCC\xCC";
+constexpr PWCHAR gszBP[] = {
+	L"断点错误",
+	L"断点暂停",
+	L"软件断点",
+	L"单步步过",
+	L"断点删除",
+	L"硬件执行",
+	L"硬件写入",
+	L"硬件读写",
+	L"硬件暂停",
+	L"内存执行",
+	L"内存写入",
+	L"内存读写",
+	L"内存暂停",
+	L"内存属性",
+	L"内存复写"
+};
 
 
 typedef struct _BreakPoint
@@ -27,6 +44,7 @@ typedef struct _BreakPoint
 	WORD TYPES = 0;	//类型
 	WORD STATU = 0;	//状态
 	DWORD OLD = 0;	//旧的状态
+	DWORD Cout = 0;	//命中次数
 	LPVOID Address = 0;	//地址
 	PWCHAR str = 0;
 }BreakPoint, * LPBreakPoint;

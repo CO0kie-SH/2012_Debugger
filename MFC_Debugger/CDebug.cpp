@@ -34,7 +34,7 @@ BOOL CMyPoint::AddSoftPoint(LPVOID Address, WORD Type, PWCHAR Text)
 	}
 	else
 	{
-		tmp = BreakPoint{ Type,1,0,Address };
+		tmp = BreakPoint{ Type,1,0,0,Address };
 		if (NULL == ReadMemory(Address, &tmp.OLD, 1))
 			return 0;
 		if (NULL == WriteMemory(Address, gszCC, 1))
@@ -92,7 +92,7 @@ BOOL CMyPoint::AddHardPoint(LPVOID Address, WORD Type, PWCHAR Text)
 	GetThreadContext(gDATA.PS.hThread, &ct);
 	
 	
-	tmp = BreakPoint{ Type,1,0,Address };
+	tmp = BreakPoint{ Type,1,0,0,Address };
 	PDBG_REG7 pDr7 = (PDBG_REG7)&ct.Dr7;
 
 	switch (Type)
@@ -633,14 +633,14 @@ BOOL CDebug::AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text/* = 0*/)
 	}
 	else if (Type == defBP_内存执行)
 	{
-		tmp = BreakPoint{ Type,1,0,Address };
+		tmp = BreakPoint{ Type,1,0,0,Address };
 		if (Text)
 			tmp.str = Text;
 		bRet = VirtualProtectEx(gDATA.PS.hProcess, Address, 1, PAGE_READWRITE, &tmp.OLD);
 		this->mBreakPoint[Address] = tmp;
-		DWORD_PTR MemFitst = (DWORD_PTR)Address / 1000;
-		MemFitst *= 1000;
-		this->mBreakPoint[(LPVOID)MemFitst] = { defBP_内存属性,1,tmp.OLD,Address };
+		//DWORD_PTR MemFitst = (DWORD_PTR)Address / 1000;
+		//MemFitst *= 1000;
+		//this->mBreakPoint[(LPVOID)MemFitst] = { defBP_内存属性,1,tmp.OLD,0,Address };
 	}
 	return bRet;
 }

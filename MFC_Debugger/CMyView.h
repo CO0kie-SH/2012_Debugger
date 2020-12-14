@@ -1,12 +1,12 @@
 #pragma once
 #include "resource.h"
 #include "CDLG_MEM.h"
+#include "CDebug.h"
 
-
-#define defNum_MAX_断点 7
+#define defNum_MAX_断点 6
 constexpr PWCHAR gszBreakPoring[] =
 {
-	L"摘要",L"命中",L"反汇编",L"状态",
+	L"摘要",L"命中",/*L"反汇编",*/L"状态",
 	L"模块/标签/异常",L"地址",L"类型"
 };
 
@@ -19,7 +19,13 @@ public:
 
 	BOOL InitView();
 	void SetTime();
-	
+	void SetLS(map<LPVOID, BreakPoint>& BreakPoints);
+
+
+	void DeleLSM1()
+	{
+		mLS_Main->DeleteAllItems();
+	}
 private:
 	HWND mh_Wind;
 	//控件指针

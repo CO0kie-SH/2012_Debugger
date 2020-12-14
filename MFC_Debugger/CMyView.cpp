@@ -75,3 +75,24 @@ void CMyView::SetTime()
 		}
 	}
 }
+
+void CMyView::SetLS(map<LPVOID, BreakPoint>& BreakPoints)
+{
+	while (mLS_Main->DeleteColumn(0));
+	for (int i = 0; i < defNum_MAX_¶Ïµã; i++)
+		mLS_Main->InsertColumn(0, gszBreakPoring[i], 100, 150);
+	auto begin = BreakPoints.begin();
+	while (begin != BreakPoints.end())
+	{
+		BreakPoint &tmp = begin->second;
+		mLS_Main->InsertItem(0, gszBP[tmp.TYPES]);
+		mstr.Format(L"0x%p", tmp.Address);
+		mLS_Main->SetItemText(0, 1, mstr);
+		mLS_Main->SetItemText(0, 3, tmp.STATU ? L"ÆôÓÃ" : L"Î´Öª");
+		mstr.Format(L"%lu", tmp.Cout);
+		mLS_Main->SetItemText(0, 4, mstr);
+		if (tmp.str)
+			mLS_Main->SetItemText(0, 5, tmp.str);
+		begin++;
+	}
+}

@@ -72,9 +72,15 @@ void CManage::MenuClick(UINT_PTR nID)
 
 void CManage::TabClick(int nID)
 {
-	if (nID == 4) //断点管理
+	CDebug* cDebug = (CDebug*)gDATA.CDEBUG;
+	if (!cDebug) return;	//没有调试器
+	if (nID == 4)			//断点管理
 	{
-
+		gcView->SetLS(cDebug->mBreakPoint);
+	}
+	else
+	{
+		gcView->DeleLSM1();
 	}
 }
 #pragma endregion

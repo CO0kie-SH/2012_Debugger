@@ -48,9 +48,6 @@
     <ClInclude Include="CDATA.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CDebug.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="RegStruct.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -62,6 +59,9 @@
     </ClInclude>
     <ClInclude Include="CManage.h">
       <Filter>C调试器框架</Filter>
+    </ClInclude>
+    <ClInclude Include="CDebug.h">
+      <Filter>C调试器处理</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -83,9 +83,6 @@
     <ClCompile Include="CDATA.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CDebug.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CDLG_MEM.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -94,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="CManage.cpp">
       <Filter>C调试器框架</Filter>
+    </ClCompile>
+    <ClCompile Include="CDebug.cpp">
+      <Filter>C调试器处理</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

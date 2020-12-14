@@ -1,7 +1,7 @@
 #pragma once
 #include "CConsole.h"
 #include "CMyView.h"
-#include "CDebug.h"
+
 
 class CManage
 {
