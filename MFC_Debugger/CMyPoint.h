@@ -75,6 +75,7 @@ typedef struct _WaitPoint	//断点结构体：用于判断是否是断点
 
 class CMyPoint
 {
+	friend class CPE;
 public:
 	WaitPoint mWait;
 	map<LPVOID, BreakPoint> mBreakPoint;
@@ -83,6 +84,10 @@ public:
 	CMyPoint()
 	{
 		ZeroMemory(&mWait, sizeof(WaitPoint));
+	}
+	CMyPoint* GetThis()
+	{
+		return this;
 	}
 	//增加软件断点
 	BOOL AddSoftPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);

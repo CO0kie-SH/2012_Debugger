@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CDebug.h"
 #include ".\capstone\include\capstone.h"
+#include "CPE.h"
 
 //1. 包含头文件
 #ifdef _WIN64 // 64位平台编译器会自动定义这个宏
@@ -379,10 +380,9 @@ DWORD CDebug::OnLine()
 			{
 				std::cout << "\t正在设置下一条断点";
 				this->mWait.StepPoint = TRUE;
-				// 线程上下文
 				CONTEXT context = { CONTEXT_FULL };
-				// 获取线程上下文
 				GetThreadContext(gDATA.PS.hThread, &context);
+				//向反汇编提供EIP
 				this->DisASM((LPVOID)context.Eip, 5);
 				break;
 			}
@@ -399,6 +399,33 @@ DWORD CDebug::OnLine()
 				this->ShowDlls();
 				this->mWait.LineShow = 0;
 				continue;
+			}
+			else if (strcmp(cmd, "im") == 0)
+			{
+				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
+				this->ShowDlls((BYTE*)address, 1);
+			}
+			else if (strcmp(cmd, "ex") == 0)
+			{
+				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
+				this->ShowDlls((BYTE*)address, 2);
+			}
+			else if (strcmp(cmd, "d") == 0)
+			{
+				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
+				while (true)
+				{
+					printf("确定要查看内存0x%lX吗？y/n：", address);
+					gets_s(cmdline, 200);
+					if (strcmp(cmdline, "n") == 0)
+						break;
+					else if (strcmp(cmdline, "y") == 0)
+					{
+						this->ShowMem((LPVOID)address);
+						this->mWait.LineShow = 0;
+						continue;
+					}
+				}
 			}
 			else if (strcmp(cmd, "ba") == 0)
 			{
@@ -663,10 +690,24 @@ void CDebug::ShowRegister()
 	CONTEXT context = { CONTEXT_FULL };
 	// 获取线程上下文
 	GetThreadContext(gDATA.PS.hThread, &context);
-	DWORD mem = context.Esp, end = context.Ebp + 4, max = end - mem;
+
+	//按照 CONTEXT 格式输出 相应寄存器
+	for (DWORD i = 0, *p = &context.ContextFlags; i < 7; i++)
+	{
+		printf("%s\t%3s0x%08lX\n", gszRegDrs[i], "：", p[i]);
+	}
+	for (DWORD i = 0, *p = &context.SegGs; i < 4; i++)
+	{
+		printf("%s\t%3s0x%04lX\n", gszRegGs[i], "：", p[i]);
+	}
+	for (DWORD i = 0, *p = &context.Edi; i < 12; i++)
+	{
+		printf("%s\t%3s0x%08lX\n", gszRegEs[i], "：", p[i]);
+	}
+	DWORD mem = context.Esp, end = context.Ebp, max = end - mem+4;
 	BYTE* buff = new BYTE[max];
 	this->ReadMemory((LPVOID)mem, buff, max);
-	printf("ESP=0x%08lX\tEBP=0x%08lX\n", mem, end - 4);
+	printf("\nESP=0x%08lX\tEBP=0x%08lX\n", mem, end);
 	for (DWORD i = 0, *p = (PDWORD)buff; i < max; p++)
 	{
 		printf("地址：0x%lX\t", mem + i);
@@ -679,7 +720,7 @@ void CDebug::ShowRegister()
 	delete[] buff;
 }
 
-void CDebug::ShowDlls(BYTE* Address)
+void CDebug::ShowDlls(BYTE* Address,int id)
 {
 	HANDLE hToolHelp = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, gDATA.PS.dwProcessId);
 	if (hToolHelp == INVALID_HANDLE_VALUE)	return;
@@ -701,10 +742,32 @@ typedef struct tagMODULEENTRY32W
 		do {
 			printf("模块0x%p\t大小0x%08X\t%15S\t%S\n",
 				info.modBaseAddr, info.modBaseSize, info.szModule, info.szExePath);
+			if (Address && Address == info.modBaseAddr)
+			{
+				CPE cPE(CMyPoint().GetThis());
+				if (id == 1)
+					cPE.ShowImports(Address, info.modBaseSize);
+				else if (id == 2)
+					cPE.ShowExports(Address, info.modBaseSize);
+				break;
+			}
 		} while (Module32Next(hToolHelp, &info));
 	}
 	CloseHandle(hToolHelp);
 	return;
 }
 
-
+void CDebug::ShowMem(LPVOID Address)
+{
+	BYTE buff[4];
+	this->ReadMemory(Address, buff, 4);
+	for (DWORD i = 0, *p = (PDWORD)buff; i < 1; p++)
+	{
+		printf("地址：0x%p\t", Address);
+		for (BYTE j = 4; j--; )
+		{
+			printf("%02X ", buff[i++]);
+		}
+		printf("|四字节：0x%08lX\n", *p);
+	}
+}

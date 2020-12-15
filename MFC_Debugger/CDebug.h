@@ -3,6 +3,37 @@
 #include <tlhelp32.h>
 #include "CMyPoint.h"
 
+constexpr PCHAR gszRegDrs[] = {
+	"\nContextFlags",
+	"Dr0",
+	"Dr1",
+	"Dr2",
+	"Dr3",
+	"Dr6",
+	"Dr7"
+};
+
+constexpr PCHAR gszRegGs[] = {
+	"\nSegGs",
+	"SegFs",
+	"SegEs",
+	"SegDs"
+};
+
+constexpr PCHAR gszRegEs[] = {
+	"\nEdi",
+	"Esi",
+	"Ebx",
+	"Edx",
+	"Ecx",
+	"Eax",
+	"\nEbp",
+	"Eip",
+	"SegCs",              // MUST BE SANITIZED
+	"EFlags",             // MUST BE SANITIZED
+	"Esp",
+	"SegSs"
+};
 
 class CDebug :public CMyPoint
 {
@@ -43,6 +74,7 @@ public:
 
 	BOOL SetTFPoint(BOOL isSetFlag = TRUE);
 	void ShowRegister();
-	void ShowDlls(BYTE* Address = 0);
+	void ShowDlls(BYTE* Address = 0, int id = 0);
+	void ShowMem(LPVOID Address);
 };
 
