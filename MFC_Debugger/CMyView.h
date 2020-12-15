@@ -18,6 +18,7 @@ public:
 	~CMyView();
 
 	BOOL InitView();
+	CMenu* GetPlug();
 	void SetTime();
 	void SetLS(map<LPVOID, BreakPoint>& BreakPoints);
 

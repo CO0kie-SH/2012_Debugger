@@ -67,7 +67,8 @@ BEGIN_MESSAGE_MAP(CMFCDebuggerDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_COMMAND_RANGE(ID_32771, ID_32784, &CMFCDebuggerDlg::OnMenuClick)
+	ON_COMMAND_RANGE(ID_32771, ID_32789, &CMFCDebuggerDlg::OnMenuClick)
+	ON_COMMAND_RANGE(5000, 5999, &CMFCDebuggerDlg::OnMenuClick)
 	ON_WM_TIMER()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABM1, &CMFCDebuggerDlg::OnTcnSelchangeTabm1)
 END_MESSAGE_MAP()
@@ -179,7 +180,7 @@ void CMFCDebuggerDlg::OnTimer(UINT_PTR nIDEvent)
 	static BOOL isFirst = true;
 	if (isFirst)
 	{
-		SetTimer(1, 1000, NULL);
+		SetTimer(1, 999, NULL);
 		isFirst = false;
 		gcView->InitView();
 	}

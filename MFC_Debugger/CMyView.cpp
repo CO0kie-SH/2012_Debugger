@@ -55,6 +55,28 @@ BOOL CMyView::InitView()
 	return true;
 }
 
+
+/*	函数：获得界面菜单->插件
+*/
+CMenu* CMyView::GetPlug()
+{
+	CMenu* cMenu = this->mMain->GetMenu(), * cPlug = 0;
+	int count = cMenu->GetMenuItemCount();
+	CString str;
+	for (int i = 0; i < count; i++)
+	{
+		if (cMenu->GetMenuStringW(i, str, MF_BYPOSITION)
+			&& str == L"插件")
+		{
+			cPlug = cMenu->GetSubMenu(i);
+			count = cPlug->GetMenuItemCount();
+			cPlug->AppendMenuW(0, 5000, L"测试");
+			return cPlug;
+		}
+	}
+	return cPlug;
+}
+
 void CMyView::SetTime()
 {
 	t = CTime::GetCurrentTime();

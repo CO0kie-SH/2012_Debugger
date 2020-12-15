@@ -46,6 +46,7 @@ BOOL CManage::InitManage(CDialogEx* wMain)
 
 	//初始化视图类
 	gcView = new CMyView(wMain);
+	this->m_Plug = gcView->GetPlug();
 	return true;
 }
 
@@ -66,6 +67,18 @@ void CManage::MenuClick(UINT_PTR nID)
 			printf("退出进程%lu,%p：%d\n", gDATA.PS.dwProcessId, gDATA.PS.hProcess,
 				::TerminateProcess(gDATA.PS.hProcess, 0));
 		}break;
+	case ID_32789:{	//插件
+		int count = this->m_Plug->GetMenuItemCount();
+		//清除旧的菜单
+		for (int i = count; --i;)
+			this->m_Plug->DeleteMenu(i, MF_BYPOSITION);
+		WCHAR buff[MAX_PATH];
+		
+		count = GetCurrentDirectoryW(MAX_PATH, buff);
+		CString str;
+		str.Format(L"%s\\Plugs\\", buff);
+		printf("\t插件路径\n%S\n", str.GetString());
+	}break;
 	default: break;
 	}
 }
