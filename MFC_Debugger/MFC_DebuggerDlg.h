@@ -35,4 +35,6 @@ public:
 	afx_msg void OnMenuClick(UINT_PTR nID);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnTcnSelchangeTabm1(NMHDR* pNMHDR, LRESULT* pResult);
+//	afx_msg void OnHdnItemdblclickListm1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNMRClickListm1(NMHDR* pNMHDR, LRESULT* pResult);
 };

@@ -72,6 +72,9 @@
     <ClInclude Include="CDATA.h">
       <Filter>C依赖</Filter>
     </ClInclude>
+    <ClInclude Include="CDLG_EDIT.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Debugger.cpp">
@@ -109,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="CDATA.cpp">
       <Filter>C依赖</Filter>
+    </ClCompile>
+    <ClCompile Include="CDLG_EDIT.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CMyPoint.h"
+#include "CDLG_EDIT.h"
 
 #pragma region CMyPoint
 BOOL CMyPoint::AddSoftPoint(LPVOID Address, WORD Type, PWCHAR Text)
@@ -153,11 +154,61 @@ BOOL CMyPoint::AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text)
 	return this->SetMemPoint((LPVOID)dwAdd);
 }
 
-BOOL CMyPoint::AddIFPoint(LPVOID Address, WORD Type, PCHAR Text)
+BOOL CMyPoint::AddIFPoint(DWORD_PTR Address)
 {
-	this->mWait.IFPoint = new BreakPointIF{
-		Type,1,(DWORD)Address,0,Address,Text };
-	return this->SetTFPoint(0);
+	if (this->mWait.IFPoint)
+	{
+		jstr = L"条件断点已存在。";
+		return 0;
+	}
+	LPBreakPoint tmp = this->GetBP((LPVOID)Address);
+	if (tmp == 0)
+	{
+		jstr = L"没有该断点。";
+		return 0;
+	}
+	if (tmp->TYPES!=defBP_软件执行)
+	{
+		jstr = L"目前只支持软件断点的条件。";
+		return 0;
+	}
+	jstr.Format(L"请设置%p的条件断点。", tmp->Address);
+	CDLG_EDIT edit;
+	edit.DoModal();
+	if (jstr == L"")
+	{
+		jstr = L"没有输入字符串。";
+		return 0;
+	}
+	CStringA strA(jstr);
+	char *cmdline = (char*)(LPCSTR)strA,
+		buff1[40] = {0},
+		buff2[40] = {0};
+	int i;
+	sscanf_s(cmdline, "%s %s %d", buff1, 40, buff2, 40, &i);
+	BreakPointIF tmpIF = {
+		0,1,i,0,tmp
+	};
+	if (strcmp(buff1, "Cout") == 0 ||
+		strcmp(buff1, "Count") == 0)
+	{
+		if (strcmp(buff2, "==") == 0)
+		{
+			return AddIFPoint(&tmpIF, TYPE_计次相等, "条件相等");
+		}
+	}
+	jstr = L"无法识别条件语句。";
+	return 0;
+}
+
+BOOL CMyPoint::AddIFPoint(LPBreakPointIF BP, WORD Type, PCHAR Text)
+{
+	LPBreakPointIF tmp = new BreakPointIF{ 0 };
+	memcpy(tmp, BP, sizeof(BreakPointIF));
+	tmp->TYPES = Type;
+	tmp->str = Text;
+	this->mWait.IFPoint = tmp;
+	return TRUE;
 }
 
 BOOL CMyPoint::SetMemPoint(LPVOID Address, BOOL isRe/* = 0*/)
@@ -195,6 +246,8 @@ BOOL CMyPoint::SetMemPoint(LPVOID Address, BOOL isRe/* = 0*/)
 	return bRet;
 }
 
+/*	函数：作废
+*/
 BOOL CMyPoint::OnPointIF(LPDEBUG_EVENT pDbg_event, LPDWORD dbg_status)
 {
 	BreakPointIF tmp = *this->mWait.IFPoint;
@@ -219,9 +272,9 @@ BOOL CMyPoint::OnPointIF(LPDEBUG_EVENT pDbg_event, LPDWORD dbg_status)
 	LPDWORD es = &context.Edi;
 	for (WORD i = 0; i < 8; i++)
 	{
-		if (i == tmp.TYPES)
-			printf("寄存器%s->0x%08lX==%s->%p\n",
-				gszRegIFs[i], es[i], tmp.str, tmp.Address);
+		//if (i == tmp.TYPES)
+		//	printf("寄存器%s->0x%08lX==%s->%p\n",
+		//		gszRegIFs[i], es[i], tmp.str, tmp.Address);
 	}
 
 	if (es[tmp.TYPES] == tmp.OLD)

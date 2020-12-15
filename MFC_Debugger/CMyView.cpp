@@ -16,7 +16,10 @@ CMyView::CMyView(CDialogEx* wMain)
 	this->mMain = wMain;
 	this->mh_Wind = wMain->GetSafeHwnd();
 
-	mLS_Main = (CListCtrl*)wMain->GetDlgItem(IDC_LISTM1);
+	this->mLS_Main = (CListCtrl*)wMain->GetDlgItem(IDC_LISTM1);
+	this->mLS_Main->SetExtendedStyle(/*LVS_EX_CHECKBOXES |*/ //这是复选框
+		LVS_EX_GRIDLINES |
+		LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	for (int i = 0; i < defNum_MAX_断点; i++)
 	{
 		mLS_Main->InsertColumn(0, gszBreakPoring[i], 100, 150);
@@ -70,7 +73,7 @@ CMenu* CMyView::GetPlug()
 		{
 			cPlug = cMenu->GetSubMenu(i);
 			count = cPlug->GetMenuItemCount();
-			cPlug->AppendMenuW(0, 5000, L"测试");
+			//cPlug->AppendMenuW(0, 5000, L"测试");
 			return cPlug;
 		}
 	}
@@ -108,6 +111,7 @@ void CMyView::SetLS(map<LPVOID, BreakPoint>& BreakPoints)
 	{
 		BreakPoint &tmp = begin->second;
 		mLS_Main->InsertItem(0, gszBP[tmp.TYPES]);
+		mLS_Main->SetItemData(0, (DWORD_PTR)tmp.Address);
 		mstr.Format(L"0x%p", tmp.Address);
 		mLS_Main->SetItemText(0, 1, mstr);
 		mLS_Main->SetItemText(0, 3, tmp.STATU ? L"启用" : L"未知");

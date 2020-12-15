@@ -29,6 +29,11 @@ enum EM_BUG_NUM
 	BUG_内存异常错误
 };
 
+enum EM_BPIF_TYPE
+{
+	TYPE_计次相等
+};
+
 constexpr LPVOID gszCC = "\xCC\xCC";
 constexpr PWCHAR gszBP[] = {
 	L"断点错误",
@@ -72,11 +77,11 @@ typedef struct _BreakPoint
 
 typedef struct _BreakPointIF
 {
-	WORD TYPES = 0;	//类型
-	WORD STATU = 0;	//状态
-	DWORD OLD = 0;	//旧的状态
-	DWORD Cout = 0;	//命中次数
-	LPVOID Address = 0;	//地址
+	WORD TYPES	= 0;	//类型
+	WORD STATU	= 0;	//状态
+	DWORD OLD	= 0;	//旧的状态
+	DWORD Cout	= 0;	//命中次数
+	LPBreakPoint BP = 0;	//地址
 	PCHAR str = 0;
 }BreakPointIF, * LPBreakPointIF;
 
@@ -102,19 +107,30 @@ public:
 	WaitPoint mWait;
 	map<LPVOID, BreakPoint> mBreakPoint;
 	LPBreakPoint MemyPoint;
+protected:
+	HANDLE mHeap;
 public:
 	CMyPoint()
 	{
 		ZeroMemory(&mWait, sizeof(WaitPoint));
+		mHeap = HeapCreate(0, 0, 0);
 	}
 	~CMyPoint()
 	{
 		if (this->mWait.IFPoint)
 			delete this->mWait.IFPoint;
+		HeapDestroy(mHeap);
 	}
-	CMyPoint* GetThis()
+	CMyPoint* GetCMyPoint()
 	{
 		return this;
+	}
+	LPBreakPoint GetBP(LPVOID Address)
+	{
+		auto end = this->mBreakPoint.find(Address);
+		if (end == this->mBreakPoint.end())
+			return 0;
+		return &(*end).second;
 	}
 	//增加软件断点
 	BOOL AddSoftPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
@@ -123,7 +139,8 @@ public:
 	//设置内存断点
 	BOOL AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
 	//设置条件断点
-	BOOL AddIFPoint(LPVOID Address, WORD Type, PCHAR Text);
+	BOOL AddIFPoint(DWORD_PTR Address);
+	BOOL AddIFPoint(LPBreakPointIF BP, WORD Type, PCHAR Text);
 	//重设软件断点
 	BOOL ReSetSoftPoint(LPBreakPoint pPoint);
 	//重设内存断点

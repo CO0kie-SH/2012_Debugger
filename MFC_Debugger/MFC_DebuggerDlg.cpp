@@ -71,6 +71,8 @@ BEGIN_MESSAGE_MAP(CMFCDebuggerDlg, CDialogEx)
 	ON_COMMAND_RANGE(5000, 5999, &CMFCDebuggerDlg::OnMenuClick)
 	ON_WM_TIMER()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABM1, &CMFCDebuggerDlg::OnTcnSelchangeTabm1)
+//	ON_NOTIFY(HDN_ITEMDBLCLICK, 0, &CMFCDebuggerDlg::OnHdnItemdblclickListm1)
+ON_NOTIFY(NM_RCLICK, IDC_LISTM1, &CMFCDebuggerDlg::OnNMRClickListm1)
 END_MESSAGE_MAP()
 
 
@@ -199,6 +201,26 @@ void CMFCDebuggerDlg::OnTcnSelchangeTabm1(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		CTabCtrl* cTab = (CTabCtrl*)this->GetDlgItem(IDC_TABM1);
 		gcManage.TabClick(cTab->GetCurSel() + 1);
+	}
+	*pResult = 0;
+}
+
+
+//void CMFCDebuggerDlg::OnHdnItemdblclickListm1(NMHDR* pNMHDR, LRESULT* pResult)
+//{
+//	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+//	// TODO: 在此添加控件通知处理程序代码
+//	*pResult = 0;
+//}
+
+
+void CMFCDebuggerDlg::OnNMRClickListm1(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	if (pNMItemActivate->iItem != -1)
+	{
+		gcManage.LSM1RClick(pNMItemActivate);
 	}
 	*pResult = 0;
 }

@@ -1,7 +1,9 @@
 #pragma once
 #include "resource.h"
 #include "CDLG_MEM.h"
+#include "CDLG_EDIT.h"
 #include "CDebug.h"
+
 
 #define defNum_MAX_¶Ïµã 6
 constexpr PWCHAR gszBreakPoring[] =
@@ -26,6 +28,10 @@ public:
 	void DeleLSM1()
 	{
 		mLS_Main->DeleteAllItems();
+	}
+	CListCtrl* GetLSM1()
+	{
+		return mLS_Main;
 	}
 private:
 	HWND mh_Wind;
