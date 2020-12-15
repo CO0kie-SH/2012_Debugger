@@ -146,19 +146,8 @@ public:
 	//重设内存断点
 	BOOL SetMemPoint(LPVOID Address, BOOL isRe = 0);
 
-	BOOL SetTFPoint(BOOL isSetFlag = TRUE)
-	{
-		if (isSetFlag)
-			this->mWait.PassPoint = TRUE;
-		// 线程上下文
-		CONTEXT context = { CONTEXT_FULL };
-		// 获取线程上下文
-		GetThreadContext(gDATA.PS.hThread, &context);
-		((PEFLAGS)&context.EFlags)->TF = 1;
-		// 设置线程上下文
-		return SetThreadContext(gDATA.PS.hThread, &context);
-	}
-
+	BOOL SetTFPoint(BOOL isSetFlag = TRUE);
+	//寄存器条件断点->作废
 	BOOL OnPointIF(LPDEBUG_EVENT pDbg_event, LPDWORD dbg_status);
 	//读对方内存
 	SIZE_T ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen);

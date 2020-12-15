@@ -246,6 +246,21 @@ BOOL CMyPoint::SetMemPoint(LPVOID Address, BOOL isRe/* = 0*/)
 	return bRet;
 }
 
+/*	函数：设置单步断点
+*/
+BOOL CMyPoint::SetTFPoint(BOOL isSetFlag)
+{
+	if (isSetFlag)
+		this->mWait.PassPoint = TRUE;
+	// 线程上下文
+	CONTEXT context = { CONTEXT_FULL };
+	// 获取线程上下文
+	GetThreadContext(gDATA.PS.hThread, &context);
+	((PEFLAGS)&context.EFlags)->TF = 1;
+	// 设置线程上下文
+	return SetThreadContext(gDATA.PS.hThread, &context);
+}
+
 /*	函数：作废
 */
 BOOL CMyPoint::OnPointIF(LPDEBUG_EVENT pDbg_event, LPDWORD dbg_status)
