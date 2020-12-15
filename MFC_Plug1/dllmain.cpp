@@ -5,10 +5,12 @@
 #include "framework.h"
 #include <afxwin.h>
 #include <afxdllx.h>
+#include "CPlug.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
 
 static AFX_EXTENSION_MODULE MFCPlug1DLL = { false, nullptr };
 
@@ -20,7 +22,10 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
-		TRACE0("MFC_Plug1.DLL 正在初始化!\n");
+		_beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, 0, 0, 0);
+		gcPlug.InitCPlug(hInstance);
+
+		//TRACE0("MFC_Plug1.DLL 正在初始化!\n");
 
 		// 扩展 DLL 一次性初始化
 		if (!AfxInitExtensionModule(MFCPlug1DLL, hInstance))
@@ -43,9 +48,9 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 	}
 	else if (dwReason == DLL_PROCESS_DETACH)
 	{
-		TRACE0("MFC_Plug1.DLL 正在终止!\n");
-
+		//TRACE0("MFC_Plug1.DLL 正在终止!\n");
 		// 在调用析构函数之前终止该库
+
 		AfxTermExtensionModule(MFCPlug1DLL);
 	}
 	return 1;   // 确定

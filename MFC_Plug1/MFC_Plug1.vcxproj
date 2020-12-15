@@ -184,6 +184,9 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CData.cpp" />
+    <ClCompile Include="CDLG_Plug.cpp" />
+    <ClCompile Include="CPlug.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
@@ -211,6 +214,9 @@
     <None Include="res\MFC_Plug1.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CData.h" />
+    <ClInclude Include="CDLG_Plug.h" />
+    <ClInclude Include="CPlug.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />

@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="插件类">
+      <UniqueIdentifier>{15925851-dbf3-4ece-ba32-dface1655d60}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Plug1.cpp">
@@ -22,6 +25,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CDLG_Plug.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CPlug.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CData.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,6 +56,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CDLG_Plug.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CPlug.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CData.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
