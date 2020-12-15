@@ -112,7 +112,7 @@ BOOL CManage::InitPlugs(CString& Path)
 
 
 		//调用GetProcAddress取出指定的插件初始化函数地址
-		nAddress = (DWORD)GetProcAddress(Handle, "InitPlugin");
+		nAddress = (DWORD)GetProcAddress(Handle, "InitPlug");
 
 		//如果函数获取失败
 		if (nAddress == 0)
@@ -140,17 +140,11 @@ void CManage::MenuClickDLL(UINT_PTR nID)
 	DLLINFO& tmp = this->m_DLLs[nID];
 	DWORD nAddress = 0;
 	CString str, * pstr = &str;
-	HWND hWnd = this->m_Main->GetSafeHwnd();
 	//调用GetProcAddress取出指定的插件初始化函数地址
 	nAddress = (DWORD)GetProcAddress(tmp.hDLL, "MenuSetting");
 	if (nAddress == 0) return;
 	//调用菜单函数
-	__asm
-	{
-		push hWnd;
-		call nAddress;
-		add esp, 0x4;
-	}
+	__asm call nAddress;
 	return;
 }
 

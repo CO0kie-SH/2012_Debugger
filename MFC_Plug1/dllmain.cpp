@@ -22,7 +22,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
-		_beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, 0, 0, 0);
+		//_beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, 0, 0, 0);
 		gcPlug.InitCPlug(hInstance);
 
 		//TRACE0("MFC_Plug1.DLL 正在初始化!\n");
