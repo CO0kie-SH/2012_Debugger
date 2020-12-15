@@ -49,6 +49,17 @@ constexpr PWCHAR gszBP[] = {
 	L"内存复写"
 };
 
+constexpr PCHAR gszRegIFs[] = {
+	"Edi",
+	"Esi",
+	"Ebx",
+	"Edx",
+	"Ecx",
+	"Eax",
+	"Ebp",
+	"Eip"
+};
+
 typedef struct _BreakPoint
 {
 	WORD TYPES = 0;	//类型
@@ -59,6 +70,16 @@ typedef struct _BreakPoint
 	PWCHAR str = 0;
 }BreakPoint, * LPBreakPoint;
 
+typedef struct _BreakPointIF
+{
+	WORD TYPES = 0;	//类型
+	WORD STATU = 0;	//状态
+	DWORD OLD = 0;	//旧的状态
+	DWORD Cout = 0;	//命中次数
+	LPVOID Address = 0;	//地址
+	PCHAR str = 0;
+}BreakPointIF, * LPBreakPointIF;
+
 typedef struct _WaitPoint	//断点结构体：用于判断是否是断点
 {
 	BYTE SYSPoint;			//系统载入断点
@@ -68,6 +89,7 @@ typedef struct _WaitPoint	//断点结构体：用于判断是否是断点
 	LPBreakPoint SoftPoint;	//软件断点
 	LPBreakPoint HardPoint;	//硬件断点
 	LPBreakPoint MemyPoint;	//内存断点
+	LPBreakPointIF IFPoint;	//条件断点
 	PCHAR LineShow;			//断点标志字
 }WaitPoint, * LPWaitPoint;
 
@@ -85,6 +107,11 @@ public:
 	{
 		ZeroMemory(&mWait, sizeof(WaitPoint));
 	}
+	~CMyPoint()
+	{
+		if (this->mWait.IFPoint)
+			delete this->mWait.IFPoint;
+	}
 	CMyPoint* GetThis()
 	{
 		return this;
@@ -95,13 +122,30 @@ public:
 	BOOL AddHardPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
 	//设置内存断点
 	BOOL AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
+	//设置条件断点
+	BOOL AddIFPoint(LPVOID Address, WORD Type, PCHAR Text);
 	//重设软件断点
 	BOOL ReSetSoftPoint(LPBreakPoint pPoint);
 	//重设内存断点
 	BOOL SetMemPoint(LPVOID Address, BOOL isRe = 0);
 
-	SIZE_T ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen);
+	BOOL SetTFPoint(BOOL isSetFlag = TRUE)
+	{
+		if (isSetFlag)
+			this->mWait.PassPoint = TRUE;
+		// 线程上下文
+		CONTEXT context = { CONTEXT_FULL };
+		// 获取线程上下文
+		GetThreadContext(gDATA.PS.hThread, &context);
+		((PEFLAGS)&context.EFlags)->TF = 1;
+		// 设置线程上下文
+		return SetThreadContext(gDATA.PS.hThread, &context);
+	}
 
+	BOOL OnPointIF(LPDEBUG_EVENT pDbg_event, LPDWORD dbg_status);
+	//读对方内存
+	SIZE_T ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen);
+	//写对方内存
 	SIZE_T WriteMemory(LPVOID Address, LPVOID WriteBuff, DWORD_PTR WriteLen);
 	int Bug(int ID)
 	{

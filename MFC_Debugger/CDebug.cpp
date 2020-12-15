@@ -12,19 +12,6 @@ comment(lib, "capstone/lib/capstone_x64.lib")
 #endif // _64
 
 
-
-//CMyPoint::CMyPoint(LPWaitPoint Wait)
-//	:mpWait(Wait)
-//{
-//}
-//
-//CMyPoint::~CMyPoint()
-//{
-//}
-
-
-
-
 BOOL CDebug::InitDebug(PWCHAR Path)
 {
 	STARTUPINFO si = { sizeof(STARTUPINFO) };
@@ -63,6 +50,21 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 		switch (dbg_event.dwDebugEventCode)/*判断事件代码*/
 		{
 		case EXCEPTION_DEBUG_EVENT:     // 异常调试事件
+			if (this->mWait.IFPoint)
+			{
+				BOOL bRet = this->OnPointIF(&dbg_event, &dbg_status);
+				if (bRet == 7)
+					break;
+				else if (bRet <= TRUE)
+				{
+					this->DisASM(dbg_event.u.
+						Exception.ExceptionRecord.ExceptionAddress, 1);
+					printf("\n");
+					//this->OnLine();
+					break;
+				}
+				break;
+			}
 			printf("异常调试事件触发\n");
 			dbg_status = OnExceptionHandler(&dbg_event);
 			break;
@@ -200,7 +202,6 @@ DWORD CDebug::OnException_SingleStep(LPVOID Address, LPDEBUG_EVENT pDbg_event)
 	//判断是否为永久断点断下
 	if (this->mWait.SoftPoint)			//如果有软件标志
 	{
-		
 		printf("\n\t检测到软件断点复写，再次写入CC\n");
 		if (NULL == this->WriteMemory(					//则还原指令
 			this->mWait.SoftPoint->Address, gszCC, 1))
@@ -505,6 +506,48 @@ DWORD CDebug::OnLine()
 				}
 				printf("\n");
 			}
+			else if (strcmp(cmd, "bf") == 0)
+			{
+				if(this->mWait.IFPoint)
+				{
+					printf("条件断点已存在。\n");
+					continue;
+				}
+				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
+				while (address)
+				{
+					printf("确定要下条件断点至 0x%lX吗？[E?x]/h/n：", address);
+					gets_s(cmdline, 200);
+					if (strcmp(cmdline, "n") == 0)
+						break;
+					else if (strcmp(cmdline, "h") == 0)
+					{
+						for (char i = 0; i < 8; i++)
+						{
+							printf("%s ", gszRegIFs[i]);
+						}
+						printf("\n");
+					}
+					else
+					{
+						for (char i = 0, *p; i < 8; i++)
+						{
+							p = gszRegIFs[i];
+							if (strcmp(cmdline, p) == 0)
+							{
+								printf("设置%s断点->0x%lX：%s。", p, address,
+									this->AddIFPoint((LPVOID)address, i, p) ?
+									"成功" : "失败");
+								this->mWait.LineShow = 0;
+								address = 0;
+								break;
+							}
+						}
+						printf("\n");
+					}
+				}
+				printf("\n");
+			}
 		}
 		else {
 			printf("命令输入错误\n");
@@ -558,9 +601,6 @@ DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 		else {
 			std::cout << "(TF)\n";
 			this->SetTFPoint();
-			cs_free(pInsn, count);
-			cs_close(&handle);
-			return 0;
 		}
 	}
 	printf("\t读取指令长度=%lu\n", dwSize);
@@ -670,19 +710,6 @@ DWORD CDebug::SetHardPoint(LPBreakPoint Point, WORD Type, BOOL isBreak)
 		}
 	}
 	return (DWORD)SetThreadContext(gDATA.PS.hThread, &ct);
-}
-
-BOOL CDebug::SetTFPoint(BOOL isSetFlag/* = TRUE*/)
-{
-	if(isSetFlag)
-		this->mWait.PassPoint = TRUE;
-	// 线程上下文
-	CONTEXT context = { CONTEXT_FULL };
-	// 获取线程上下文
-	GetThreadContext(gDATA.PS.hThread, &context);
-	((PEFLAGS)&context.EFlags)->TF = 1;
-	// 设置线程上下文
-	return SetThreadContext(gDATA.PS.hThread, &context);
 }
 
 void CDebug::ShowRegister()

@@ -72,7 +72,6 @@ public:
 	// 硬件断点处理函数
 	DWORD SetHardPoint(LPBreakPoint Point, WORD Type, BOOL isBreak);
 
-	BOOL SetTFPoint(BOOL isSetFlag = TRUE);
 	void ShowRegister();
 	void ShowDlls(BYTE* Address = 0, int id = 0);
 	void ShowMem(LPVOID Address);

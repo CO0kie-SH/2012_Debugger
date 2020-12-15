@@ -153,6 +153,13 @@ BOOL CMyPoint::AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text)
 	return this->SetMemPoint((LPVOID)dwAdd);
 }
 
+BOOL CMyPoint::AddIFPoint(LPVOID Address, WORD Type, PCHAR Text)
+{
+	this->mWait.IFPoint = new BreakPointIF{
+		Type,1,(DWORD)Address,0,Address,Text };
+	return this->SetTFPoint(0);
+}
+
 BOOL CMyPoint::SetMemPoint(LPVOID Address, BOOL isRe/* = 0*/)
 {
 	BOOL bRet = 0, bSet = PAGE_NOACCESS;
@@ -186,6 +193,47 @@ BOOL CMyPoint::SetMemPoint(LPVOID Address, BOOL isRe/* = 0*/)
 	else
 		this->MemyPoint = &tmp;
 	return bRet;
+}
+
+BOOL CMyPoint::OnPointIF(LPDEBUG_EVENT pDbg_event, LPDWORD dbg_status)
+{
+	BreakPointIF tmp = *this->mWait.IFPoint;
+
+	//获取并设置单步
+	CONTEXT context = { CONTEXT_FULL };
+	GetThreadContext(gDATA.PS.hThread, &context);
+	((PEFLAGS)&context.EFlags)->TF = 1;
+	SetThreadContext(gDATA.PS.hThread, &context);
+		
+	if (context.Eip == 0x401072)
+	{
+		*dbg_status = DBG_EXCEPTION_NOT_HANDLED;
+		return 7;
+	}
+	if (context.Eip & 0x70000000)
+	{
+		*dbg_status = DBG_CONTINUE;
+		return 7;
+	}
+
+	LPDWORD es = &context.Edi;
+	for (WORD i = 0; i < 8; i++)
+	{
+		if (i == tmp.TYPES)
+			printf("寄存器%s->0x%08lX==%s->%p\n",
+				gszRegIFs[i], es[i], tmp.str, tmp.Address);
+	}
+
+	if (es[tmp.TYPES] == tmp.OLD)
+	{
+		printf("命中\n");
+		*dbg_status = DBG_CONTINUE;
+		return TRUE;
+	}
+	else
+	{
+	}
+	return 0;
 }
 
 SIZE_T CMyPoint::ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen)
