@@ -184,6 +184,7 @@ void CMFCDebuggerDlg::OnTimer(UINT_PTR nIDEvent)
 	{
 		SetTimer(1, 999, NULL);
 		isFirst = false;
+		gcManage.MenuClick(ID_32789);	//插件初始化
 		gcView->InitView();
 	}
 	else

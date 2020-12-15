@@ -122,3 +122,12 @@ void CMyView::SetLS(map<LPVOID, BreakPoint>& BreakPoints)
 		begin++;
 	}
 }
+
+void CMyView::SetMenu(CMenu* m_Plug, vector<DLLINFO>& INFOs)
+{
+	for (size_t i = 0, max = INFOs.size(); i < max; i++)
+	{
+		DLLINFO& tmp = INFOs[i];
+		m_Plug->AppendMenuW(0, 5000 + tmp.MenuID, tmp.name);
+	}
+}

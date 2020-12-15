@@ -59,5 +59,12 @@ int main()
         printf("%d\n", i);
         Sleep(333);
     }
-    getchar();
+    int key;
+    while (key= getchar())
+    {
+        if (key == 'e')
+            break;
+        else if (key == 's')
+            show(cInfo);
+    }
 }

@@ -3,7 +3,8 @@
 #include "CDLG_MEM.h"
 #include "CDLG_EDIT.h"
 #include "CDebug.h"
-
+#include <vector>
+using std::vector;
 
 #define defNum_MAX_断点 6
 constexpr PWCHAR gszBreakPoring[] =
@@ -12,6 +13,12 @@ constexpr PWCHAR gszBreakPoring[] =
 	L"模块/标签/异常",L"地址",L"类型"
 };
 
+typedef struct _DLLINFO
+{
+	DWORD MenuID;
+	HMODULE hDLL;
+	CString name;
+}DLLINFO, * LPDLLINFO;
 
 class CMyView
 {
@@ -23,6 +30,7 @@ public:
 	CMenu* GetPlug();
 	void SetTime();
 	void SetLS(map<LPVOID, BreakPoint>& BreakPoints);
+	void SetMenu(CMenu* m_Plug, vector<DLLINFO>& INFOs);
 
 
 	void DeleLSM1()

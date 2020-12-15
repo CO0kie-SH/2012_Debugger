@@ -1,0 +1,4 @@
+LIBRARY
+EXPORTS
+InitPlugin	@1
+MenuSetting	@2

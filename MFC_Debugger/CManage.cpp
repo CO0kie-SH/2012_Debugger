@@ -52,6 +52,11 @@ BOOL CManage::InitManage(CDialogEx* wMain)
 
 void CManage::MenuClick(UINT_PTR nID)
 {
+	if (nID >= 5000 && nID < 6000)
+	{
+		this->MenuClickDLL(nID - 5002);
+		return;
+	}
 	switch (nID)
 	{
 	case ID_32771:	//打开文件
@@ -80,9 +85,10 @@ void CManage::MenuClick(UINT_PTR nID)
 		count = GetModuleFileName(NULL, buff, MAX_PATH);	//得到模块路径
 		if (!count) break;
 		PathRemoveFileSpecW(buff);							//去除文件名
-		str.Format(L"%s\\%s\\*.DLL", buff, PlugPath);		//格式化路径
-		printf("\t插件路径\n%S\n", str.GetString());			//打印路径
-		InitPlugs(str);
+		str.Format(L"%s\\%s\\", buff, PlugPath);		//格式化路径
+		printf("  插件路径\n%S\n", str.GetString());			//打印路径
+		if (InitPlugs(str))
+			gcView->SetMenu(m_Plug, m_DLLs);
 	}break;
 	default: break;
 	}
@@ -91,13 +97,61 @@ void CManage::MenuClick(UINT_PTR nID)
 BOOL CManage::InitPlugs(CString& Path)
 {
 	WIN32_FIND_DATA FileInfo = { 0 };
-	HANDLE FindHandle = FindFirstFile(Path, &FileInfo);
+	HANDLE FindHandle = FindFirstFile(Path + _T("*.DLL"), &FileInfo);
+	HMODULE Handle = nullptr;
+	DWORD nAddress = 0, nID = 1;
+	CString str, * pstr = &str;
 	if (FindHandle == INVALID_HANDLE_VALUE) return 0;
 	do{
 		LPTSTR pszExtension = PathFindExtension(FileInfo.cFileName);
-		printf("后缀：%S\t%S\n", pszExtension, FileInfo.cFileName);
+
+		//调用LoadLibrary加载文件
+		Handle = LoadLibrary(Path + FileInfo.cFileName);
+		if (Handle == 0) continue;
+		printf("句柄%p\t后缀：%S\t%S\n", Handle, pszExtension, FileInfo.cFileName);
+
+
+		//调用GetProcAddress取出指定的插件初始化函数地址
+		nAddress = (DWORD)GetProcAddress(Handle, "InitPlugin");
+
+		//如果函数获取失败
+		if (nAddress == 0)
+		{
+			FreeLibrary(Handle);
+			Handle = nullptr;
+			continue;
+		}
+
+		//调用初始化函数
+		str = L"";
+		__asm
+		{
+			push pstr;
+			call nAddress;
+			add esp, 0x4;
+		}
+		m_DLLs.push_back({ ++nID,Handle,str });
 	} while (FindNextFile(FindHandle, &FileInfo));
-	return 0;
+	return m_DLLs.size() > 0;
+}
+
+void CManage::MenuClickDLL(UINT_PTR nID)
+{
+	DLLINFO& tmp = this->m_DLLs[nID];
+	DWORD nAddress = 0;
+	CString str, * pstr = &str;
+	HWND hWnd = this->m_Main->GetSafeHwnd();
+	//调用GetProcAddress取出指定的插件初始化函数地址
+	nAddress = (DWORD)GetProcAddress(tmp.hDLL, "MenuSetting");
+	if (nAddress == 0) return;
+	//调用菜单函数
+	__asm
+	{
+		push hWnd;
+		call nAddress;
+		add esp, 0x4;
+	}
+	return;
 }
 
 void CManage::TabClick(int nID)
@@ -123,9 +177,10 @@ void CManage::LSM1RClick(LPNMITEMACTIVATE pNMItemActivate)
 	CString str;
 	if (this->m_TAB_ID == 4)			//断点管理
 	{
-		str.Format(L"增加条件断点%s。\n%s",
+		str.Format(L"增加条件断点%s。\n",
 			cDebug->AddIFPoint(ls->GetItemData(pNMItemActivate->iItem))
-			? L"成功" : L"失败", jstr);
+			? L"成功" : L"失败");
+		str += jstr;
 		AfxMessageBox(str);
 	}
 }

@@ -6,6 +6,8 @@
 class CManage
 {
 public:
+	vector<DLLINFO> m_DLLs;
+public:
 	CManage()
 		:m_cConsole(0), m_Main(0),
 		mh_Debug(0), m_Plug(0),
@@ -14,6 +16,7 @@ public:
 	}
 	~CManage();
 	void MenuClick(UINT_PTR nID);
+	void MenuClickDLL(UINT_PTR nID);
 	void TabClick(int nID);
 	void LSM1RClick(LPNMITEMACTIVATE pNMItemActivate);
 
