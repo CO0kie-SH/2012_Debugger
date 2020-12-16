@@ -21,9 +21,7 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 {
 	STARTUPINFO si = { sizeof(STARTUPINFO) };
 	PROCESS_INFORMATION ps = { 0 };
-	// 以附加方式启动
 	BOOL bRet = 0;
-	// BOOL bRet = DebugActiveProcess(3008);
 	if (gDATA.isCreate == FALSE)
 		return 0;
 	if (gDATA.isCreate == TRUE)
@@ -58,14 +56,18 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 	}
 	if (!ps.hProcess || !ps.hThread)
 	{
-		MessageBox(0, L"打开进程", 0, 0);
+		MessageBox(0, L"打开进程失败", 0, 0);
 		return 0;
 	}
 	gcManage.DebugCreate(&ps, gDATA.isCreate);
 	DEBUG_EVENT dbg_event;
 	BOOL Loop_Debug = TRUE;
 	DWORD dbg_status = DBG_CONTINUE;  //异常处理了
-	SymInitialize(ps.hProcess, NULL, TRUE);
+	if(!SymInitialize(ps.hProcess, NULL, FALSE))
+	{
+		MessageBox(0, L"创建符号失败", 0, 0);
+		return 0;
+	}
 	// 调试循序
 	while (Loop_Debug)
 	{
@@ -83,8 +85,8 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 			printf("线程创建事件触发\n");
 			break;
 		case CREATE_PROCESS_DEBUG_EVENT: {// 进程创建事件
-			gDATA.OEP = dbg_event.u.CreateProcessInfo.lpStartAddress; // 程序入口
 			printf("进程创建事件触发,OEP=%p\n", gDATA.OEP);
+			gDATA.OEP = dbg_event.u.CreateProcessInfo.lpStartAddress; // 程序入口
 			this->DisASM(gDATA.OEP, 5);
 			//printf("增加OEP硬件断点=%d\n", this->AddHardPoint(gDATA.OEP, defBP_硬件执行));
 			printf("增加OEP软件断点=%d\n", this->AddSoftPoint(gDATA.OEP, defBP_软件执行, L"OEP入口"));
@@ -97,9 +99,22 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 			Loop_Debug = FALSE;
 			printf("进程退出事件触发\n");
 			break;
-		case LOAD_DLL_DEBUG_EVENT:      // 映射DLL事件
-			printf("DLL加载事件触发\n");
-			break;
+		case LOAD_DLL_DEBUG_EVENT: {	// 映射DLL事件
+			//指定缓冲区
+			CHAR path[MAX_PATH];
+			//获取模块路径
+			GetModuleFileNameA(
+				(HMODULE)dbg_event.u.LoadDll.lpBaseOfDll,
+				path, MAX_PATH);
+			//加载符号模块
+			DWORD64 Load = SymLoadModule64(
+				ps.hProcess,
+				dbg_event.u.LoadDll.hFile,
+				NULL, NULL,
+				(DWORD64)dbg_event.u.LoadDll.lpBaseOfDll, 0);
+			printf("DLL加载事件触发\t符号加载：%llX\t%s\n",
+				Load, path);
+		}break;
 		case UNLOAD_DLL_DEBUG_EVENT:    // 卸载DLL事件 
 			printf("DLL卸载事件触发\n");
 			break;
@@ -115,10 +130,8 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 			dbg_event.dwThreadId,    //调试线程ID,必须从DEBUG_EVNET中获取
 			dbg_status);			 //异常是否处理，只对异常有效
 	}
-	if (ps.hThread)
-		CloseHandle(ps.hThread);
-	if (ps.hProcess)
-		CloseHandle(ps.hProcess);
+	CloseHandle(ps.hThread);
+	CloseHandle(ps.hProcess);
 	return 0;
 }
 
@@ -639,18 +652,36 @@ DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 			by = pInsn[j].bytes[k];
 			strA.AppendFormat("%02X ", by);
 		}
-		printf("0x%p |%-16s|%s %s\n",
+		printf("0x%p |%-16s|%s %s\t",
 			(LPVOID)pInsn[j].address, /*指令地址*/
 			strA.GetBuffer(),
 			pInsn[j].mnemonic,/*指令操作码*/
 			pInsn[j].op_str/*指令操作数*/
 		);
+		GetSymName(Address, strA);
+		printf("\n");
 	}
 	// 释放保存指令的空间
 	cs_free(pInsn, count);
 	// 关闭句柄
 	cs_close(&handle);
 	return 0;
+}
+
+BOOL CDebug::GetSymName(LPVOID Address, CStringA& Str)
+{
+	DWORD64 dwDisplacement = 0;
+	char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+	PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)buffer;
+	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+	pSymbol->MaxNameLen = MAX_SYM_NAME;
+
+	// 根据地址获取符号信息 成功返回True并打印符号名 失败则返回False
+	if (!SymFromAddr(gDATA.PS.hProcess, (DWORD64)Address, &dwDisplacement, pSymbol))
+		return FALSE;
+
+	printf("%s", pSymbol->Name);
+	return TRUE;
 }
 
 DWORD CDebug::SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak)

@@ -101,6 +101,9 @@ void CManage::MenuClick(UINT_PTR nID)
 		if (InitPlugs(str))
 			gcView->SetMenu(m_Plug, m_DLLs);
 	}break;
+	case ID_32791: {	//ิดย๋ต๗สิ
+
+	}break;
 	default: break;
 	}
 }

@@ -67,7 +67,7 @@ public:
 	
 	//反汇编
 	DWORD DisASM(LPVOID Address, DWORD ReadLen);
-
+	BOOL GetSymName(LPVOID Address, CStringA& Str);
 
 	// 软件断点处理函数
 	DWORD SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak);
