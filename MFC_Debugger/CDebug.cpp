@@ -2,6 +2,7 @@
 #include "CDebug.h"
 #include ".\capstone\include\capstone.h"
 #include "CPE.h"
+#include "CManage.h"
 
 //1. 包含头文件
 #ifdef _WIN64 // 64位平台编译器会自动定义这个宏
@@ -35,8 +36,8 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 		MessageBox(0, L"进程创建失败", 0, 0);
 		return 0;
 	}
-
 	gDATA.SetPS(&ps);
+	gcManage.DebugCreate(&ps, DebugInfo_创建进程);
 	DEBUG_EVENT dbg_event;
 	BOOL Loop_Debug = TRUE;
 	DWORD dbg_status = DBG_CONTINUE;  //异常处理了

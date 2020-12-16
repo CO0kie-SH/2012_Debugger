@@ -22,6 +22,7 @@ public:
 
 	BOOL InitManage(CDialogEx* wMain);
 	BOOL InitPlugs(CString& Path);
+	void DebugCreate(PROCESS_INFORMATION* pPS, BOOL isCreate);
 private:
 	CConsole* m_cConsole;
 	CDialogEx* m_Main;

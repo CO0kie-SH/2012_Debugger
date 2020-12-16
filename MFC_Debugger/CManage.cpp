@@ -85,7 +85,7 @@ void CManage::MenuClick(UINT_PTR nID)
 		count = GetModuleFileName(NULL, buff, MAX_PATH);	//得到模块路径
 		if (!count) break;
 		PathRemoveFileSpecW(buff);							//去除文件名
-		str.Format(L"%s\\%s\\", buff, PlugPath);		//格式化路径
+		str.Format(L"%s\\%s\\", buff, PlugPath);			//格式化路径
 		printf("  插件路径\n%S\n", str.GetString());			//打印路径
 		if (InitPlugs(str))
 			gcView->SetMenu(m_Plug, m_DLLs);
@@ -97,8 +97,8 @@ void CManage::MenuClick(UINT_PTR nID)
 BOOL CManage::InitPlugs(CString& Path)
 {
 	WIN32_FIND_DATA FileInfo = { 0 };
-	HANDLE FindHandle = FindFirstFile(Path + _T("*.DLL"), &FileInfo);
 	HMODULE Handle = nullptr;
+	HANDLE FindHandle = FindFirstFile(Path + _T("*.dll"), &FileInfo);
 	DWORD nAddress = 0, nID = 1;
 	CString str, * pstr = &str;
 	if (FindHandle == INVALID_HANDLE_VALUE) return 0;
@@ -117,11 +117,10 @@ BOOL CManage::InitPlugs(CString& Path)
 		//如果函数获取失败
 		if (nAddress == 0)
 		{
-			FreeLibrary(Handle);
+			//FreeLibrary(Handle);
 			Handle = nullptr;
 			continue;
 		}
-
 		//调用初始化函数
 		str = L"";
 		__asm
@@ -135,6 +134,26 @@ BOOL CManage::InitPlugs(CString& Path)
 	return m_DLLs.size() > 0;
 }
 
+void CManage::DebugCreate(PROCESS_INFORMATION* pPS, BOOL isCreate)
+{
+	DebugInfo Info, * pInfo = &Info;					//初始化结构体
+	Info.isCreate = isCreate;							//初始化进程创建方式
+	memcpy(pInfo, pPS, sizeof(PROCESS_INFORMATION));	//初始化进程信息
+
+	for (size_t i = 0, max = m_DLLs.size(); i < max; i++)	//循环容器
+	{
+		auto &tmp = m_DLLs[i];
+		DWORD nAddress = (DWORD)GetProcAddress(tmp.hDLL, "DebugCreate");
+		if (nAddress == 0) continue;
+		__asm
+		{
+			push pInfo;
+			call nAddress;
+			add esp, 0x4;
+		}
+	}
+}
+
 void CManage::MenuClickDLL(UINT_PTR nID)
 {
 	DLLINFO& tmp = this->m_DLLs[nID];
@@ -145,7 +164,6 @@ void CManage::MenuClickDLL(UINT_PTR nID)
 	if (nAddress == 0) return;
 	//调用菜单函数
 	__asm call nAddress;
-	return;
 }
 
 void CManage::TabClick(int nID)

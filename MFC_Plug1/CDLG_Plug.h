@@ -23,4 +23,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	virtual void OnOK();
 	virtual void PreInitDialog();
+public:
+	afx_msg void OnBnClickedButton1();
 };

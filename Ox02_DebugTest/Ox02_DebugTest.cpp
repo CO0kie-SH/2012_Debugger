@@ -30,9 +30,9 @@ void show(CProInfo1& cInfo)
     cout << "\n\t开始检查NQIP标志\n";
 #pragma region NtQueryInformationProcess
     //参考维基百科https://www.wanweibaike.com/wiki-%E8%BF%9B%E7%A8%8B%E7%8E%AF%E5%A2%83%E5%9D%97
-    CheckRemoteDebuggerPresent(GetCurrentProcess(), &isDBG);
-    cout << "CheckRemoteDebuggerPresent=\t";
-    show(isDBG);
+    //CheckRemoteDebuggerPresent(GetCurrentProcess(), &isDBG);
+    //cout << "CheckRemoteDebuggerPresent=\t";
+    //show(isDBG);
 
 
     //参考先知社区https://xz.aliyun.com/t/5339
@@ -57,7 +57,7 @@ int main()
         _asm xor eax, eax;
         _asm xor eax, eax;
         printf("%d\n", i);
-        Sleep(333);
+        Sleep(111);
     }
     int key;
     while (key= getchar())

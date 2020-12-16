@@ -1,6 +1,6 @@
 #pragma once
-#define FilePath1 L"..\\Debug\\Ox02_DebugTest.exe"
-#define FilePath L"..\\dbgtarget.exe"
+#define FilePath L"..\\Debug\\Ox02_DebugTest.exe"
+#define FilePath2 L"..\\dbgtarget.exe"
 #define PlugPath1 L"Debug"
 #define PlugPath L"Plugs"
 
@@ -14,6 +14,19 @@ typedef struct _MAINWIND
 	HWND	hwOld;
 	HWND	hwMEM;
 }MAINWIND, * LPMAINWIND;
+
+enum EM_DebugInfo
+{
+	DebugInfo_错误,
+	DebugInfo_创建进程,
+	DebugInfo_附加进程
+};
+
+typedef struct _DebugInfo
+{
+	PROCESS_INFORMATION PS;
+	BOOL isCreate;
+}DebugInfo, * LPDebugInfo;
 
 
 

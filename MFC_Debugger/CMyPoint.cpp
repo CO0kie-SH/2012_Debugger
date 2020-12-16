@@ -319,7 +319,14 @@ SIZE_T CMyPoint::WriteMemory(LPVOID Address, LPVOID WriteBuff, DWORD_PTR WriteLe
 	SIZE_T Len = 0;
 	if (NULL == WriteProcessMemory(gDATA.PS.hProcess, Address, WriteBuff, WriteLen, &Len))
 	{
-		printf("设置目标内存%p失败%lu。\n", Address, WriteLen);
+		DWORD oldProtect;
+		// 1.修改目标分页属性
+		VirtualProtectEx(gDATA.PS.hProcess, Address, 1, PAGE_READWRITE, &oldProtect);
+		WriteProcessMemory(gDATA.PS.hProcess, Address, WriteBuff, WriteLen, &Len);
+		//4. 恢复目标分页属性
+		VirtualProtectEx(gDATA.PS.hProcess, Address, 1, oldProtect, &oldProtect);
+		if (Len == 0)
+			printf("设置目标内存%p失败%lu。\n", Address, WriteLen);
 	}
 	return Len;
 }
