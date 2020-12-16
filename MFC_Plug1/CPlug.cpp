@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CPlug.h"
 #include "..\DLL_HOOK\CHOOK.h"
-#pragma comment(lib,"..\\Debug\\Plugs\\DLL_HOOK.lib")
+#pragma comment(lib,"..\\Debug\\DLL_HOOK.lib")
 
 CDLG_Plug gdlg;
 CPlug gcPlug;

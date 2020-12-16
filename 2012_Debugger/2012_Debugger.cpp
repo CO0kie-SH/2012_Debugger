@@ -2,6 +2,8 @@
 //
 
 #include <iostream>
+#include <Windows.h>
+#include <DbgHelp.h>
 
 int main()
 {

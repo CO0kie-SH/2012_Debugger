@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "CPE.h"
+
+
 CPE::CPE(CMyPoint* pcPoint)
 {
 	mHeap = HeapCreate(0, 0, 0);

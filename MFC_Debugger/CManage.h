@@ -2,7 +2,6 @@
 #include "CConsole.h"
 #include "CMyView.h"
 
-
 class CManage
 {
 public:

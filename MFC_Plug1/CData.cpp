@@ -2,7 +2,6 @@
 #include "CData.h"
 #include "CDLG_Plug.h"
 
-
 HINSTANCE ghInstance;
 CData gData;
 

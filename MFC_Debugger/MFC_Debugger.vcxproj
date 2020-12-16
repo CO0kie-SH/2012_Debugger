@@ -194,6 +194,7 @@
     <ClInclude Include="CDLG_EDIT.h" />
     <ClInclude Include="CDLG_MEM.h" />
     <ClInclude Include="CManage.h" />
+    <ClInclude Include="CMyDbghelp.h" />
     <ClInclude Include="CMyPoint.h" />
     <ClInclude Include="CMyView.h" />
     <ClInclude Include="CPE.h" />
@@ -213,6 +214,7 @@
     <ClCompile Include="CDLG_EDIT.cpp" />
     <ClCompile Include="CDLG_MEM.cpp" />
     <ClCompile Include="CManage.cpp" />
+    <ClCompile Include="CMyDbghelp.cpp" />
     <ClCompile Include="CMyPoint.cpp" />
     <ClCompile Include="CMyView.cpp" />
     <ClCompile Include="CPE.cpp" />
