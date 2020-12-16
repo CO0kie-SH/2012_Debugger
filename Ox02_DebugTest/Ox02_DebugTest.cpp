@@ -40,7 +40,7 @@ void show(CProInfo1& cInfo)
     show(cInfo.NQIP_DebugPort());
     cout << "NQIP_DebugHandle=\t";
     show(cInfo.NQIP_ProcessDebugObjectHandle());
-    cout << "NQIP_ParentPID\t=\t" << cInfo.NQIP_ParentPID() << endl;
+    //cout << "NQIP_ParentPID\t=\t" << cInfo.NQIP_ParentPID() << endl;
 #pragma endregion
 }
 

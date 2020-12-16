@@ -8,7 +8,7 @@ public:
 	~CPE();
 	void ShowImports(LPVOID Add, DWORD Size);
 	void ShowExports(LPVOID Add, DWORD Size);
-	BOOL DUMP();
+	void DUMP(LPVOID Add, DWORD Size, PWCHAR Name);
 private:
 	HANDLE mHeap;
 	CMyPoint* mcPoint;

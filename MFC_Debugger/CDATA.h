@@ -1,6 +1,7 @@
 #pragma once
 #define FilePath1 L"..\\Debug\\Ox02_DebugTest.exe"
 #define FilePath L"..\\dbgtarget.exe"
+#define FilePath3 L"D:\\Downloads\\Mon\\202012\\3.exe"
 #define PlugPath1 L"Debug"
 #define PlugPath L"Plugs"
 
@@ -42,13 +43,7 @@ public:
 	~CDATA();
 
 
-	void SetPS(PROCESS_INFORMATION* ps = 0)
-	{
-		if (ps == 0)
-			ZeroMemory(&this->PS, sizeof(PROCESS_INFORMATION));
-		else
-			memcpy(&this->PS, ps, sizeof(PROCESS_INFORMATION));
-	}
+	BOOL SetPS(PROCESS_INFORMATION* ps = 0);
 private:
 };
 

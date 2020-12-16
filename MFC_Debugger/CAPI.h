@@ -14,6 +14,7 @@ public:
 		OutputDebugString(L"~CAPI()\n");
 	}
 	static BOOL FindWindowByTID(DWORD TID);
+	static BOOL GetTIDByPID(DWORD PID, DWORD* TID = 0);
 };
 
 extern CAPI gAPI;

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CAPI.h"
+#include <tlhelp32.h>
 
 CAPI gAPI;
 CString jstr;
@@ -32,5 +33,33 @@ BOOL CAPI::FindWindowByTID(DWORD TID)
 		}
 		// 取得下一个窗口句柄
 	} while (hwndWindow = ::GetNextWindow(hwndWindow, GW_HWNDNEXT));
+	return 0;
+}
+
+BOOL CAPI::GetTIDByPID(DWORD PID, DWORD* TID)
+{
+	// 2. 创建快照用于遍历线程，参数 1 为TH32CS_SNAPTHREAD， 参数 2 没有意义
+	//    在实际的使用中，参数2不管是什么，遍历到的都是所有的线程
+	HANDLE Snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, NULL);
+
+	// 3. 初始化结构体用于保存遍历到的线程的数据
+	THREADENTRY32 ThreadInfo = { sizeof(THREADENTRY32) };
+
+	// 4. 尝试遍历快照中的第一个线程
+	if (Thread32First(Snapshot, &ThreadInfo))
+	{
+		// 5. 输出对应的信息
+		do {
+			// [PID 和 TID 共用同一套数据]
+
+			// 5.1 筛选出对应进程的所有线程
+			if (ThreadInfo.th32OwnerProcessID == PID)
+			{
+				if (TID)	*TID = ThreadInfo.th32ThreadID;
+				return TRUE;
+			}
+			// 6. 遍历下一个线程
+		} while (Thread32Next(Snapshot, &ThreadInfo));
+	}
 	return 0;
 }

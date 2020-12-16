@@ -55,7 +55,9 @@ void CDLG_Plug::OnBnClickedButton1()
 	// TODO: 在此添加控件通知处理程序代码
 	if (gData.Info.PS.hProcess)
 	{
-		DLL_HOOK((int)gData.Info.PS.hProcess);
+		this->MessageBox(
+			DLL_HOOK((int)gData.Info.PS.hProcess)
+			? L"注入成功" : L"注入失败");
 	}
 	this->PostMessageW(WM_CLOSE);
 }

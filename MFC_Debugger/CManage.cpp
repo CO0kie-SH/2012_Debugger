@@ -66,6 +66,16 @@ void CManage::MenuClick(UINT_PTR nID)
 			puts("已经有调试线程了。");
 			return;
 		}
+		gDATA.isCreate = TRUE;
+		mh_Debug =(HANDLE) _beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath, 0, 0);
+		break;
+	case ID_32772:	//附加文件
+		if (gDATA.CDEBUG)	//已经存在调试
+		{
+			puts("已经有调试线程了。");
+			return;
+		}
+		gDATA.isCreate = 2;
 		mh_Debug =(HANDLE) _beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath, 0, 0);
 		break;
 	case ID_32775:	//退出

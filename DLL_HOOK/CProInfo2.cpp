@@ -96,7 +96,7 @@ BOOL CProInfo2::HOOK_NT()
 					(pNameTable->u1.AddressOfData + _ModAdd);
 				if (strcmp(pName->Name, "NtQueryInformationProcess") == 0)
 				{
-					DWORD dwOldProtect, * add = (DWORD*)0x001EE180,
+					DWORD dwOldProtect, * add = (DWORD*)0x41E16C,
 						my = (DWORD)MyNtQueryInformationProcess;
 					printf("×¼±¸HOOK,%p->%lX,%lX\n", add, *add, my);
 					VirtualProtect(add, 4, PAGE_EXECUTE_READWRITE, &dwOldProtect);

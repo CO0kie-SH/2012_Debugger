@@ -16,7 +16,7 @@ comment(lib, "capstone/lib/capstone_x64.lib")
 BOOL CDebug::InitDebug(PWCHAR Path)
 {
 	STARTUPINFO si = { sizeof(STARTUPINFO) };
-	PROCESS_INFORMATION ps;
+	PROCESS_INFORMATION ps = { 0 };
 	// 以附加方式启动
 	BOOL bRet = 0;
 	// BOOL bRet = DebugActiveProcess(3008);
@@ -34,28 +34,25 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 			NULL,												//  环境变量
 			NULL,												//  工作目录
 			&si, &ps);
-	else
+	else if (gDATA.isCreate == 2)
 	{
 		printf("请输入PID：");
-
-		char cmdline[200] = {};
-		char cmd[100] = {};
-		DWORD pid;
-		gets_s(cmdline, 200);
-		sscanf_s(cmdline, "%lu", &pid);
-		bRet = DebugActiveProcess(pid);
-		if (bRet)
-		{
-			ps.dwProcessId = pid;
-		}
+		char cmdline[20] = {};
+		gets_s(cmdline, 20);
+		sscanf_s(cmdline, "%lu", &ps.dwProcessId);
+		bRet = DebugActiveProcess(ps.dwProcessId);
 	}
 	if (bRet == FALSE)
 	{
 		MessageBox(0, L"进程创建失败", 0, 0);
 		return 0;
 	}
-	gDATA.SetPS(&ps);
-	gcManage.DebugCreate(&ps, DebugInfo_创建进程);
+	if (!gDATA.SetPS(&ps))
+	{
+		MessageBox(0, L"进程信息获取失败", 0, 0);
+		return 0;
+	}
+	gcManage.DebugCreate(&ps, gDATA.isCreate);
 	DEBUG_EVENT dbg_event;
 	BOOL Loop_Debug = TRUE;
 	DWORD dbg_status = DBG_CONTINUE;  //异常处理了
@@ -447,6 +444,11 @@ DWORD CDebug::OnLine()
 				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
 				this->ShowDlls((BYTE*)address, 2);
 			}
+			else if (strcmp(cmd, "dump") == 0)
+			{
+				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
+				this->ShowDlls((BYTE*)address, 3);
+			}
 			else if (strcmp(cmd, "d") == 0)
 			{
 				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
@@ -791,6 +793,8 @@ typedef struct tagMODULEENTRY32W
 					cPE.ShowImports(Address, info.modBaseSize);
 				else if (id == 2)
 					cPE.ShowExports(Address, info.modBaseSize);
+				else if (id == 3)
+					cPE.DUMP(Address, info.modBaseSize,info.szModule);
 				break;
 			}
 		} while (Module32Next(hToolHelp, &info));

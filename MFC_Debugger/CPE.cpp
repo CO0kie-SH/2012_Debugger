@@ -101,3 +101,46 @@ void CPE::ShowExports(LPVOID Add, DWORD Size)
 			(name ? name : "-"));
 	}
 }
+
+void CPE::DUMP(LPVOID Add, DWORD Size, PWCHAR Name)
+{
+	if (!mHeap) return;
+	//1 获取到导出表结构
+	char* MOD = (char*)::HeapAlloc(mHeap, HEAP_ZERO_MEMORY, Size);
+	if (!MOD || !mcPoint->ReadMemory(Add, MOD, Size))
+	{
+		printf("\n无法得到内存。\n");
+		HeapDestroy(mHeap);
+		return;
+	}
+	PIMAGE_DOS_HEADER pDos = (PIMAGE_DOS_HEADER)MOD;
+	PIMAGE_NT_HEADERS pNt = (PIMAGE_NT_HEADERS)(pDos->e_lfanew + MOD);
+
+	//修改对齐
+	pNt->OptionalHeader.FileAlignment = pNt->OptionalHeader.SectionAlignment;
+
+	//找到区段表头
+	IMAGE_SECTION_HEADER* pScn = IMAGE_FIRST_SECTION(pNt);
+	while (pScn->VirtualAddress != 0)
+	{
+		pScn->PointerToRawData = pScn->VirtualAddress;
+		pScn++;
+	}
+	CString str;
+	str.Format(L"D:\\%s", Name);
+	HANDLE hFile = CreateFileW(
+		str,
+		GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ,
+		NULL,
+		CREATE_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL,
+		0
+	);
+	if (hFile == INVALID_HANDLE_VALUE)
+		return;
+	DWORD dwTemp = 0;
+	WriteFile(hFile, MOD, Size, &dwTemp, 0);
+	//关闭句柄
+	CloseHandle(hFile);
+}
