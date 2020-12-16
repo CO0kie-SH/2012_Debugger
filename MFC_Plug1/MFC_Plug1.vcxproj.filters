@@ -16,6 +16,9 @@
     <Filter Include="插件类">
       <UniqueIdentifier>{15925851-dbf3-4ece-ba32-dface1655d60}</UniqueIdentifier>
     </Filter>
+    <Filter Include="插件类\界面">
+      <UniqueIdentifier>{dc2318e2-b576-4381-9dce-69da4bedd5ca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Plug1.cpp">
@@ -27,14 +30,14 @@
     <ClCompile Include="pch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CDLG_Plug.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CPlug.cpp">
-      <Filter>源文件</Filter>
+      <Filter>插件类</Filter>
     </ClCompile>
     <ClCompile Include="CData.cpp">
-      <Filter>源文件</Filter>
+      <Filter>插件类</Filter>
+    </ClCompile>
+    <ClCompile Include="CDLG_Plug.cpp">
+      <Filter>插件类\界面</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,14 +61,14 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CDLG_Plug.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="CPlug.h">
-      <Filter>头文件</Filter>
+      <Filter>插件类</Filter>
     </ClInclude>
     <ClInclude Include="CData.h">
-      <Filter>头文件</Filter>
+      <Filter>插件类</Filter>
+    </ClInclude>
+    <ClInclude Include="CDLG_Plug.h">
+      <Filter>插件类\界面</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

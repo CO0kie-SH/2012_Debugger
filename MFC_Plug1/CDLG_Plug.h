@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "afxdialogex.h"
-#include "CData.h"
 
 
 // CDLG_Plug 对话框
@@ -22,4 +21,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
 	DECLARE_MESSAGE_MAP()
+	virtual void OnOK();
+	virtual void PreInitDialog();
 };

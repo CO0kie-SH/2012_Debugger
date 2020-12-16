@@ -19,6 +19,7 @@ void InitPlug(void* pStr)
 void MenuSetting()
 {
 	gdlg.DoModal();
+	gData.hDLG = 0;
 }
 
 void CPlug::InitCPlug(HINSTANCE hInstance)

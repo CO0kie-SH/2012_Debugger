@@ -10,5 +10,6 @@
 // 添加要在此处预编译的标头
 #include "framework.h"
 #include "resource.h"
+#include "CData.h"
 
 #endif //PCH_H

@@ -12,5 +12,8 @@ class CPlug
 public:
 	~CPlug();
 	void InitCPlug(HINSTANCE hInstance);
+	void ChangeData() {
+		printf("数据更改。");
+	};
 };
 extern CPlug gcPlug;
