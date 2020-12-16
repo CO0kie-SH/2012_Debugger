@@ -13,6 +13,7 @@ unsigned __stdcall ThreadProc(PWCHAR Path)
 	gDATA.CDEBUG = &debug;
 	debug.InitDebug(Path);
 	gDATA.CDEBUG = 0;
+	gDATA.isCreate = 0;
 	return 0;
 }
 

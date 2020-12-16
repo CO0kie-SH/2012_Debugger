@@ -1,6 +1,6 @@
 #pragma once
-#define FilePath L"..\\Debug\\Ox02_DebugTest.exe"
-#define FilePath2 L"..\\dbgtarget.exe"
+#define FilePath1 L"..\\Debug\\Ox02_DebugTest.exe"
+#define FilePath L"..\\dbgtarget.exe"
 #define PlugPath1 L"Debug"
 #define PlugPath L"Plugs"
 
@@ -36,6 +36,7 @@ public:
 	LPVOID OEP;
 	LPVOID CDEBUG;
 	PROCESS_INFORMATION PS;
+	BOOL isCreate;
 public:
 	CDATA();
 	~CDATA();

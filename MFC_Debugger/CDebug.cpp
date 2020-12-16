@@ -18,19 +18,37 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 	STARTUPINFO si = { sizeof(STARTUPINFO) };
 	PROCESS_INFORMATION ps;
 	// 以附加方式启动
+	BOOL bRet = 0;
 	// BOOL bRet = DebugActiveProcess(3008);
+	if (gDATA.isCreate == FALSE)
+		return 0;
+	if (gDATA.isCreate == TRUE)
+		//以调试方式启动进程
+		bRet = CreateProcess(
+			Path,											//	调试目标路径
+			NULL,												//  命令行参数
+			NULL,												//  进程安全属性	
+			NULL,												//  线程安全属性	
+			FALSE,												//  是否继承句柄表
+			DEBUG_ONLY_THIS_PROCESS | CREATE_NEW_CONSOLE,		//  以只调试方式启动进程
+			NULL,												//  环境变量
+			NULL,												//  工作目录
+			&si, &ps);
+	else
+	{
+		printf("请输入PID：");
 
-	//以调试方式启动进程
-	BOOL bRet = CreateProcess(
-		Path,											//	调试目标路径
-		NULL,												//  命令行参数
-		NULL,												//  进程安全属性	
-		NULL,												//  线程安全属性	
-		FALSE,												//  是否继承句柄表
-		DEBUG_ONLY_THIS_PROCESS | CREATE_NEW_CONSOLE,		//  以只调试方式启动进程
-		NULL,												//  环境变量
-		NULL,												//  工作目录
-		&si, &ps);
+		char cmdline[200] = {};
+		char cmd[100] = {};
+		DWORD pid;
+		gets_s(cmdline, 200);
+		sscanf_s(cmdline, "%lu", &pid);
+		bRet = DebugActiveProcess(pid);
+		if (bRet)
+		{
+			ps.dwProcessId = pid;
+		}
+	}
 	if (bRet == FALSE)
 	{
 		MessageBox(0, L"进程创建失败", 0, 0);
@@ -396,6 +414,15 @@ DWORD CDebug::OnLine()
 				this->DisASM((LPVOID)context.Eip, 5);
 				break;
 			}
+			else if (strcmp(cmd, "u") == 0)
+			{
+				std::cout << "\t反汇编如下";
+				CONTEXT context = { CONTEXT_FULL };
+				GetThreadContext(gDATA.PS.hThread, &context);
+				//向反汇编提供EIP
+				this->DisASM((LPVOID)context.Eip, 5);
+				continue;
+			}
 			else if (strcmp(cmd, "r") == 0)
 			{
 				std::cout << "\n\t寄存器信息如下\n";
@@ -423,16 +450,36 @@ DWORD CDebug::OnLine()
 			else if (strcmp(cmd, "d") == 0)
 			{
 				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
-				while (true)
+				if (address == 0xCCCCCCCC)
 				{
-					printf("确定要查看内存0x%lX吗？y/n：", address);
+					this->mWait.LineShow = 0;
+					continue;
+				}
+				while (address)
+				{
+					printf("确定要查看内存0x%lX吗？r/w/n：", address);
 					gets_s(cmdline, 200);
 					if (strcmp(cmdline, "n") == 0)
+					{
+						this->mWait.LineShow = 0;
 						break;
-					else if (strcmp(cmdline, "y") == 0)
+					}
+					else if (strcmp(cmdline, "r") == 0)
 					{
 						this->ShowMem((LPVOID)address);
 						this->mWait.LineShow = 0;
+						continue;
+					}
+					else if (strcmp(cmdline, "w") == 0)
+					{
+						this->ShowMem((LPVOID)address);
+						printf("请输入修改的值：");
+						gets_s(cmdline, 200);
+						DWORD dw = 0;
+						sscanf_s(cmdline, "%x", &dw);
+						this->mWait.LineShow = 0;
+						this->WriteMemory((LPVOID)address, &dw, 4);
+						this->ShowMem((LPVOID)address);
 						continue;
 					}
 				}

@@ -8,7 +8,7 @@ CDATA gDATA;
 
 
 
-CDATA::CDATA() :OEP(0), CDEBUG(0)
+CDATA::CDATA() :OEP(0), CDEBUG(0), isCreate(0)
 {
 	OutputDebugString(L"CDATA()\n");
 	gINFO_mWind = {
