@@ -330,4 +330,13 @@ SIZE_T CMyPoint::WriteMemory(LPVOID Address, LPVOID WriteBuff, DWORD_PTR WriteLe
 	}
 	return Len;
 }
+int CMyPoint::Bug(int ID)
+{
+	printf("错误码：%X，", ID);
+	this->mWait.LineShow = "请联系作者修复：";
+	//this->OnLine();
+	::TerminateProcess(gDATA.PS.hProcess, 0);
+	WaitForSingleObject(gDATA.PS.hProcess, 1000);
+	return 0;
+}
 #pragma endregion

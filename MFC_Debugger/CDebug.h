@@ -3,6 +3,8 @@
 #include <tlhelp32.h>
 #include "CMyPoint.h"
 
+
+
 constexpr PCHAR gszRegDrs[] = {
 	"\nContextFlags",
 	"Dr0",

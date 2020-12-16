@@ -41,7 +41,7 @@ int OnHook(HANDLE hProcess)
 	printf_s("LodeTid=%ld\tPID=%ld\n", TID, PID);
 	WaitForSingleObject(hThread, INFINITE);
 	VirtualFreeEx(hProcess, pAddress, 0, MEM_RELEASE);
-	return 0;
+	return 1;
 }
 
 CHOOK::CHOOK(HMODULE hModule)

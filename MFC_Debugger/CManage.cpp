@@ -67,7 +67,7 @@ void CManage::MenuClick(UINT_PTR nID)
 			return;
 		}
 		gDATA.isCreate = TRUE;
-		mh_Debug =(HANDLE) _beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath, 0, 0);
+		mh_Debug =(HANDLE) _beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath2, 0, 0);
 		break;
 	case ID_32772:	//附加文件
 		if (gDATA.CDEBUG)	//已经存在调试
@@ -76,7 +76,7 @@ void CManage::MenuClick(UINT_PTR nID)
 			return;
 		}
 		gDATA.isCreate = 2;
-		mh_Debug =(HANDLE) _beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath, 0, 0);
+		mh_Debug =(HANDLE) _beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath2, 0, 0);
 		break;
 	case ID_32775:	//退出
 		if (gDATA.CDEBUG)
@@ -96,7 +96,7 @@ void CManage::MenuClick(UINT_PTR nID)
 		count = GetModuleFileName(NULL, buff, MAX_PATH);	//得到模块路径
 		if (!count) break;
 		PathRemoveFileSpecW(buff);							//去除文件名
-		str.Format(L"%s\\%s\\", buff, PlugPath);			//格式化路径
+		str.Format(L"%s\\%s\\", buff, L"Plugs");			//格式化路径
 		printf("  插件路径\n%S\n", str.GetString());			//打印路径
 		if (InitPlugs(str))
 			gcView->SetMenu(m_Plug, m_DLLs);

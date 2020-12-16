@@ -191,7 +191,7 @@ BOOL CProInfo2::HOOK_On()
 	//3 属性还原
 	VirtualProtect(_Add, 5, dwOldProtect, &dwOldProtect);
 	this->_bisHook = 1;
-	return this->_bisHook;
+	return 1;
 }
 
 BOOL CProInfo2::HOOK_Of()
@@ -205,5 +205,5 @@ BOOL CProInfo2::HOOK_Of()
 	//3 属性还原
 	VirtualProtect(_Add, 5, dwOldProtect, &dwOldProtect);
 	this->_bisHook = 1;
-	return this->_bisHook;
+	return 1;
 }

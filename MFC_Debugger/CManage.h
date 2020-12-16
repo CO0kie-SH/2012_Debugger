@@ -26,7 +26,6 @@ private:
 	CConsole* m_cConsole;
 	CDialogEx* m_Main;
 	CMenu* m_Plug;
-	//HWND mWind;
 	HANDLE mh_Debug;
 	int m_TAB_ID;
 };

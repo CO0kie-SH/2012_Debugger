@@ -22,12 +22,12 @@
     <Filter Include="C依赖">
       <UniqueIdentifier>{876dcca5-fb4c-40cf-8f5f-2e36f3b1f20b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="C界面类">
+      <UniqueIdentifier>{99c574a7-8eb3-4837-89fe-0c4808f3fb96}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MFC_Debugger.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="MFC_DebuggerDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
@@ -40,12 +40,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RegStruct.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CDLG_MEM.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CMyView.h">
@@ -73,23 +67,23 @@
       <Filter>C依赖</Filter>
     </ClInclude>
     <ClInclude Include="CDLG_EDIT.h">
-      <Filter>头文件</Filter>
+      <Filter>C界面类</Filter>
     </ClInclude>
-    <ClInclude Include="CMyDbghelp.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="CDLG_MEM.h">
+      <Filter>C界面类</Filter>
+    </ClInclude>
+    <ClInclude Include="MFC_DebuggerDlg.h">
+      <Filter>C界面类</Filter>
+    </ClInclude>
+    <ClInclude Include="RegStruct.h">
+      <Filter>C调试器处理</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Debugger.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MFC_DebuggerDlg.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CDLG_MEM.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CMyView.cpp">
@@ -117,10 +111,13 @@
       <Filter>C依赖</Filter>
     </ClCompile>
     <ClCompile Include="CDLG_EDIT.cpp">
-      <Filter>源文件</Filter>
+      <Filter>C界面类</Filter>
     </ClCompile>
-    <ClCompile Include="CMyDbghelp.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="CDLG_MEM.cpp">
+      <Filter>C界面类</Filter>
+    </ClCompile>
+    <ClCompile Include="MFC_DebuggerDlg.cpp">
+      <Filter>C界面类</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

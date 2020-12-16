@@ -153,13 +153,5 @@ public:
 	SIZE_T ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen);
 	//写对方内存
 	SIZE_T WriteMemory(LPVOID Address, LPVOID WriteBuff, DWORD_PTR WriteLen);
-	int Bug(int ID)
-	{
-		printf("错误码：%X，", ID);
-		this->mWait.LineShow = "请联系作者修复：";
-		//this->OnLine();
-		::TerminateProcess(gDATA.PS.hProcess, 0);
-		WaitForSingleObject(gDATA.PS.hProcess, 1000);
-		return 0;
-	}
+	int Bug(int ID);
 };
