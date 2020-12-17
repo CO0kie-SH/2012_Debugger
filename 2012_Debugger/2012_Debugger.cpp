@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <Windows.h>
 int main()
 {
     std::cout << "Hello World!\n";
@@ -6,5 +7,5 @@ int main()
 	{
 		std::cout << i << "\n";
 	}
-	system("PAUSE");
+	MessageBoxA(0, "ABCDE", 0, 0);
 }

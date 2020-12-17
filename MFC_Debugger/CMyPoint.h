@@ -107,31 +107,16 @@ public:
 	WaitPoint mWait;
 	map<LPVOID, BreakPoint> mBreakPoint;
 	LPBreakPoint MemyPoint;
+	PCHAR API = 0;
 protected:
 	HANDLE mHeap;
 public:
-	CMyPoint()
-	{
-		ZeroMemory(&mWait, sizeof(WaitPoint));
-		mHeap = HeapCreate(0, 0, 0);
-	}
-	~CMyPoint()
-	{
-		if (this->mWait.IFPoint)
-			delete this->mWait.IFPoint;
-		HeapDestroy(mHeap);
-	}
-	CMyPoint* GetCMyPoint()
-	{
-		return this;
-	}
-	LPBreakPoint GetBP(LPVOID Address)
-	{
-		auto end = this->mBreakPoint.find(Address);
-		if (end == this->mBreakPoint.end())
-			return 0;
-		return &(*end).second;
-	}
+	CMyPoint();
+	~CMyPoint();
+	//获得类
+	CMyPoint* GetCMyPoint();
+	//遍历map获得断点
+	LPBreakPoint GetBP(LPVOID Address);
 	//增加软件断点
 	BOOL AddSoftPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
 	//添加硬件断点
@@ -140,12 +125,13 @@ public:
 	BOOL AddMemPoint(LPVOID Address, WORD Type, PWCHAR Text = 0);
 	//设置条件断点
 	BOOL AddIFPoint(DWORD_PTR Address);
+	//设置条件断点
 	BOOL AddIFPoint(LPBreakPointIF BP, WORD Type, PCHAR Text);
 	//重设软件断点
 	BOOL ReSetSoftPoint(LPBreakPoint pPoint);
 	//重设内存断点
 	BOOL SetMemPoint(LPVOID Address, BOOL isRe = 0);
-
+	//设置单步
 	BOOL SetTFPoint(BOOL isSetFlag = TRUE);
 	//寄存器条件断点->作废
 	BOOL OnPointIF(LPDEBUG_EVENT pDbg_event, LPDWORD dbg_status);

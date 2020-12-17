@@ -3,6 +3,33 @@
 #include "CDLG_EDIT.h"
 
 #pragma region CMyPoint
+
+CMyPoint::CMyPoint()
+{
+	ZeroMemory(&mWait, sizeof(WaitPoint));
+	mHeap = HeapCreate(0, 0, 0);
+}
+
+CMyPoint::~CMyPoint()
+{
+	if (this->mWait.IFPoint)
+		delete this->mWait.IFPoint;
+	HeapDestroy(mHeap);
+}
+
+CMyPoint* CMyPoint::GetCMyPoint()
+{
+	return this;
+}
+
+LPBreakPoint CMyPoint::GetBP(LPVOID Address)
+{
+	auto end = this->mBreakPoint.find(Address);
+	if (end == this->mBreakPoint.end())
+		return 0;
+	return &(*end).second;
+}
+
 BOOL CMyPoint::AddSoftPoint(LPVOID Address, WORD Type, PWCHAR Text)
 {
 	BreakPoint tmp = this->mBreakPoint[Address];

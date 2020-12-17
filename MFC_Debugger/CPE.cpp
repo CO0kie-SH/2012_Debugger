@@ -26,6 +26,11 @@ void CPE::ShowImports(LPVOID Add, DWORD Size)
 		return;
 	}
 	PIMAGE_DOS_HEADER pDos = (PIMAGE_DOS_HEADER)MOD;
+	if (pDos->e_magic != IMAGE_DOS_SIGNATURE)
+	{
+		printf("\n无法获得的PE头。\n");
+		return;
+	}
 	//1 获取到导入表的数据目录结构
 	PIMAGE_NT_HEADERS pNt = (PIMAGE_NT_HEADERS)(pDos->e_lfanew + MOD);
 	//1 获取到导入表的数据目录结构
@@ -56,6 +61,12 @@ void CPE::ShowImports(LPVOID Add, DWORD Size)
 				PIMAGE_IMPORT_BY_NAME pName = (PIMAGE_IMPORT_BY_NAME)
 					(pNameTable->u1.AddressOfData + MOD);
 				printf("%05ld\t符号：%s\n", pName->Hint, pName->Name);
+				if (this->mcPoint->API &&
+					strcmp(pName->Name, this->mcPoint->API) == 0)
+				{
+					printf("地址：%p\n", (LPVOID)MessageBoxA);
+					return;
+				}
 			}
 			pNameTable++;
 		}
@@ -76,6 +87,11 @@ void CPE::ShowExports(LPVOID Add, DWORD Size)
 		return;
 	}
 	PIMAGE_DOS_HEADER pDos = (PIMAGE_DOS_HEADER)MOD;
+	if (pDos->e_magic != IMAGE_DOS_SIGNATURE)
+	{
+		printf("\n无法获得的PE头。\n");
+		return;
+	}
 	PIMAGE_NT_HEADERS pNt = (PIMAGE_NT_HEADERS)(pDos->e_lfanew + MOD);
 	//1 获取到导出表的数据目录结构
 	PIMAGE_DATA_DIRECTORY dwImportDir = &pNt->OptionalHeader.DataDirectory[0];
@@ -145,7 +161,10 @@ void CPE::DUMP(LPVOID Add, DWORD Size, PWCHAR Name)
 		0
 	);
 	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		printf("文件打开失败：%S\n", str.GetBuffer());
 		return;
+	}
 	DWORD dwTemp = 0;
 	WriteFile(hFile, MOD, Size, &dwTemp, 0);
 	//关闭句柄

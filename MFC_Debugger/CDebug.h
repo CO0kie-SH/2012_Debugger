@@ -40,31 +40,23 @@ constexpr PCHAR gszRegEs[] = {
 	"SegSs"
 };
 
-typedef struct _CodeLine
+
+typedef struct _CodeLine		//源码结构体
 {
-	DWORD Address;
-	std::string str;
+	DWORD Address;				//地址
+	std::string str;			//源码对应行
 }CodeLine,*LPCodeLine;
 
 
 class CDebug :public CMyPoint
 {
 private:
-	vector<CodeLine> m_codeline;
-	CStringA mPath;
+	vector<CodeLine> m_codeline;	//源码数组
+	CStringA mPath;					//主文件路径
 public:
-	CDebug()
-	{
-		OutputDebugString(L"CDebug()\n");
-		this->mWait = { TRUE };	
-	}
-	~CDebug()
-	{
-		OutputDebugString(L"~CDebug()\n");
-		WaitForSingleObject(gDATA.PS.hProcess, -1);
-		gDATA.SetPS();
-		puts("调试者线程结束。");
-	}
+	CDebug();
+	~CDebug();
+	//初始化调试器
 	BOOL InitDebug(PWCHAR Path);
 
 	// 处理异常分发函数
@@ -80,8 +72,11 @@ public:
 	
 	//反汇编
 	DWORD DisASM(LPVOID Address, DWORD ReadLen);
+	//获得符号名
 	BOOL GetSymName(LPVOID Address, char* Str);
+	//加载源码
 	BOOL LoadCode(LPCCH szPath);
+	//显示源码
 	BOOL ShowCode(DWORD Address = 0);
 
 	// 软件断点处理函数
@@ -89,8 +84,11 @@ public:
 	// 硬件断点处理函数
 	DWORD SetHardPoint(LPBreakPoint Point, WORD Type, BOOL isBreak);
 
+	//显示寄存器
 	void ShowRegister();
+	//显示模块
 	void ShowDlls(BYTE* Address = 0, int id = 0);
+	//显示内存
 	void ShowMem(LPVOID Address);
 };
 

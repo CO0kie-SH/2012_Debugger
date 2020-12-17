@@ -17,6 +17,20 @@ comment(lib, "capstone/lib/capstone_x64.lib")
 #endif // _64
 
 
+CDebug::CDebug()
+{
+	OutputDebugString(L"CDebug()\n");
+	this->mWait = { TRUE };
+}
+
+CDebug::~CDebug()
+{
+	OutputDebugString(L"~CDebug()\n");
+	WaitForSingleObject(gDATA.PS.hProcess, -1);
+	gDATA.SetPS();
+	puts("µ÷ÊÔÕßÏß³Ì½áÊø¡£");
+}
+
 BOOL CDebug::InitDebug(PWCHAR Path)
 {
 	STARTUPINFO si = { sizeof(STARTUPINFO) };
@@ -499,6 +513,15 @@ DWORD CDebug::OnLine()
 				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
 				this->ShowDlls((BYTE*)address, 2);
 			}
+			else if (strcmp(cmd, "api") == 0)
+			{
+				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
+				std::cout << "\n\tÇëÊäÈëAPIÃû£º\n";
+				gets_s(cmdline, 200);
+				this->API = cmdline;
+				this->ShowDlls((BYTE*)address, 4);
+				this->API = 0;
+			}
 			else if (strcmp(cmd, "dump") == 0)
 			{
 				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
@@ -849,15 +872,23 @@ DWORD CDebug::SetHardPoint(LPBreakPoint Point, WORD Type, BOOL isBreak)
 	GetThreadContext(gDATA.PS.hThread, &ct);
 	PDBG_REG7 pDr7 = (PDBG_REG7)&ct.Dr7;
 
-	if (Point->TYPES == Type)	//ÐÞ¸´Ó²¶Ï
+	if (Point->TYPES == Type)		//ÐÞ¸´Ó²¶Ï
 	{
-		if (Point->OLD == 70)	//¼Ä´æÆ÷1
+		if (Point->OLD == 70)		//¼Ä´æÆ÷1
 		{
-			pDr7->L0 = 1;		//Æô¶¯¶Ïµã
+			pDr7->L0 = 1;			//Æô¶¯¶Ïµã
 		}
 		else if (Point->OLD == 71)	//¼Ä´æÆ÷2
 		{
-			pDr7->L1 = 1;		//Æô¶¯¶Ïµã
+			pDr7->L1 = 1;			//Æô¶¯¶Ïµã
+		}
+		else if (Point->OLD == 72)	//¼Ä´æÆ÷3
+		{
+			pDr7->L2 = 1;			//Æô¶¯¶Ïµã
+		}
+		else if (Point->OLD == 73)	//¼Ä´æÆ÷4
+		{
+			pDr7->L3 = 1;			//Æô¶¯¶Ïµã
 		}
 	}
 	else
@@ -869,6 +900,18 @@ DWORD CDebug::SetHardPoint(LPBreakPoint Point, WORD Type, BOOL isBreak)
 			if (Point->OLD == 70)	//¼Ä´æÆ÷1
 			{
 				pDr7->L0 = 0;		//ÔÝÍ£¶Ïµã
+			}
+			if (Point->OLD == 71)	//¼Ä´æÆ÷2
+			{
+				pDr7->L1 = 0;		//ÔÝÍ£¶Ïµã
+			}
+			if (Point->OLD == 72)	//¼Ä´æÆ÷3
+			{
+				pDr7->L2 = 0;		//ÔÝÍ£¶Ïµã
+			}
+			if (Point->OLD == 73)	//¼Ä´æÆ÷4
+			{
+				pDr7->L3 = 0;		//ÔÝÍ£¶Ïµã
 			}
 			if (isBreak == TRUE)
 			{
@@ -942,8 +985,8 @@ typedef struct tagMODULEENTRY32W
 				info.modBaseAddr, info.modBaseSize, info.szModule, info.szExePath);
 			if (Address && Address == info.modBaseAddr)
 			{
-				CPE cPE(CMyPoint().GetCMyPoint());
-				if (id == 1)
+				CPE cPE(this->GetCMyPoint());
+				if (id == 1 || id == 4)
 					cPE.ShowImports(Address, info.modBaseSize);
 				else if (id == 2)
 					cPE.ShowExports(Address, info.modBaseSize);
