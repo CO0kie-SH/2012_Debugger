@@ -1,7 +1,10 @@
 #pragma once
 #include <psapi.h>
 #include <tlhelp32.h>
+#include <sstream>
 #include "CMyPoint.h"
+#include <vector>
+using std::vector;
 
 
 
@@ -37,8 +40,18 @@ constexpr PCHAR gszRegEs[] = {
 	"SegSs"
 };
 
+typedef struct _CodeLine
+{
+	DWORD Address;
+	std::string str;
+}CodeLine,*LPCodeLine;
+
+
 class CDebug :public CMyPoint
 {
+private:
+	vector<CodeLine> m_codeline;
+	CStringA mPath;
 public:
 	CDebug()
 	{
@@ -67,7 +80,9 @@ public:
 	
 	//反汇编
 	DWORD DisASM(LPVOID Address, DWORD ReadLen);
-	BOOL GetSymName(LPVOID Address, CStringA& Str);
+	BOOL GetSymName(LPVOID Address, char* Str);
+	BOOL LoadCode(LPCCH szPath);
+	BOOL ShowCode(DWORD Address = 0);
 
 	// 软件断点处理函数
 	DWORD SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak);

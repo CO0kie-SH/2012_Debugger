@@ -27,7 +27,7 @@ BOOL CDATA::SetPS(PROCESS_INFORMATION* ps)
 {
 	if (ps == 0)
 		ZeroMemory(&this->PS, sizeof(PROCESS_INFORMATION));
-	else if (this->isCreate == 1)
+	else if (this->isCreate == 1 || this->isCreate == 3)
 		memcpy(&this->PS, ps, sizeof(PROCESS_INFORMATION));
 	else if (this->isCreate == 2)
 	{

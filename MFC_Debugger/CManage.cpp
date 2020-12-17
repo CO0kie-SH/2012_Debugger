@@ -102,7 +102,13 @@ void CManage::MenuClick(UINT_PTR nID)
 			gcView->SetMenu(m_Plug, m_DLLs);
 	}break;
 	case ID_32791: {	//源码调试
-
+		if (gDATA.CDEBUG)	//已经存在调试
+		{
+			puts("已经有调试线程了。");
+			return;
+		}
+		gDATA.isCreate = 3;
+		mh_Debug = (HANDLE)_beginthreadex(0, 0, (_beginthreadex_proc_type)ThreadProc, FilePath3, 0, 0);
 	}break;
 	default: break;
 	}
@@ -203,6 +209,7 @@ void CManage::LSM1RClick(LPNMITEMACTIVATE pNMItemActivate)
 	CString str;
 	if (this->m_TAB_ID == 4)			//断点管理
 	{
+		if (!gDATA.CDEBUG) return;
 		str.Format(L"增加条件断点%s。\n",
 			cDebug->AddIFPoint(ls->GetItemData(pNMItemActivate->iItem))
 			? L"成功" : L"失败");

@@ -24,7 +24,7 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 	BOOL bRet = 0;
 	if (gDATA.isCreate == FALSE)
 		return 0;
-	if (gDATA.isCreate == TRUE)
+	if (gDATA.isCreate == TRUE ||gDATA.isCreate == 3)
 		//以调试方式启动进程
 		bRet = CreateProcess(
 			Path,											//	调试目标路径
@@ -85,8 +85,26 @@ BOOL CDebug::InitDebug(PWCHAR Path)
 			printf("线程创建事件触发\n");
 			break;
 		case CREATE_PROCESS_DEBUG_EVENT: {// 进程创建事件
-			printf("进程创建事件触发,OEP=%p\n", gDATA.OEP);
 			gDATA.OEP = dbg_event.u.CreateProcessInfo.lpStartAddress; // 程序入口
+			printf("进程创建事件触发,OEP=%p\n", gDATA.OEP);
+			if (gDATA.isCreate == 3)
+			{
+				//指定缓冲区
+				CHAR path[MAX_PATH];
+				//获取模块路径
+				GetModuleFileNameA((HMODULE)GetModuleHandle(NULL), path, MAX_PATH);
+				PathRemoveFileSpecA(path);
+				PathAppendA(path, "\\2012_Debugger.exe");
+				//加载符号模块--------------------------------------------------
+				DWORD64 Load = SymLoadModule64(gDATA.PS.hProcess,
+					dbg_event.u.CreateProcessInfo.hFile,
+					path,
+					NULL,
+					(DWORD64)0x400000,
+					0);
+				printf("加载符号%s\t%llX\n",
+					Load ? "成功" : "失败", Load);
+			}
 			this->DisASM(gDATA.OEP, 5);
 			//printf("增加OEP硬件断点=%d\n", this->AddHardPoint(gDATA.OEP, defBP_硬件执行));
 			printf("增加OEP软件断点=%d\n", this->AddSoftPoint(gDATA.OEP, defBP_软件执行, L"OEP入口"));
@@ -255,7 +273,8 @@ DWORD CDebug::OnException_SingleStep(LPVOID Address, LPDEBUG_EVENT pDbg_event)
 			return this->Bug(2);
 		this->mWait.SoftPoint->TYPES = defBP_软件执行;
 		this->mWait.SoftPoint = 0;
-		isRet = true;
+		//if (this->mWait.IFPoint)
+			isRet = true;
 	}
 	if (this->mWait.HardPoint)			//如果有硬件标志
 	{
@@ -445,6 +464,17 @@ DWORD CDebug::OnLine()
 				this->DisASM((LPVOID)context.Eip, 5);
 				continue;
 			}
+			else if (strcmp(cmd, "uu") == 0)
+			{
+				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
+				this->DisASM((LPVOID)address, 9);
+				continue;
+			}
+			else if (strcmp(cmd, "show") == 0)
+			{
+				this->ShowCode();
+				continue;
+			}
 			else if (strcmp(cmd, "r") == 0)
 			{
 				std::cout << "\n\t寄存器信息如下\n";
@@ -473,6 +503,12 @@ DWORD CDebug::OnLine()
 			{
 				sscanf_s(cmdline, "%s %x", cmd, 100, &address);
 				this->ShowDlls((BYTE*)address, 3);
+			}
+			else if (strcmp(cmd, "code") == 0)
+			{
+				std::cout << "\n\t请输入源码路径：\n";
+				gets_s(cmdline, 200);
+				this->LoadCode(cmdline);
 			}
 			else if (strcmp(cmd, "d") == 0)
 			{
@@ -646,6 +682,7 @@ DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 	}
 	printf("\t读取指令长度=%lu\n", dwSize);
 	for (size_t j = 0; j < count; j++) {
+		this->ShowCode((DWORD)pInsn[j].address);
 		strA = "";
 		for (byte k = 0,by; k < pInsn[j].size; k++)
 		{
@@ -658,7 +695,7 @@ DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 			pInsn[j].mnemonic,/*指令操作码*/
 			pInsn[j].op_str/*指令操作数*/
 		);
-		GetSymName(Address, strA);
+		GetSymName(Address, pInsn[j].op_str);
 		printf("\n");
 	}
 	// 释放保存指令的空间
@@ -668,8 +705,19 @@ DWORD CDebug::DisASM(LPVOID Address,DWORD ReadLen)
 	return 0;
 }
 
-BOOL CDebug::GetSymName(LPVOID Address, CStringA& Str)
+BOOL CDebug::GetSymName(LPVOID Address, char* Str)
 {
+	if (Str[0] == '0' && Str[1] == 'x')
+	{
+
+	}
+	else
+	{
+		return FALSE;
+	}
+	DWORD Add;
+	
+	sscanf_s(Str, "%x", &Add);
 	DWORD64 dwDisplacement = 0;
 	char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
 	PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)buffer;
@@ -682,6 +730,69 @@ BOOL CDebug::GetSymName(LPVOID Address, CStringA& Str)
 
 	printf("%s", pSymbol->Name);
 	return TRUE;
+}
+
+BOOL CDebug::LoadCode(LPCCH szPath)
+{
+	BOOL bRet = PathFileExistsA(szPath);
+	if (!bRet)	return 0;
+	HANDLE hFile = CreateFileA(szPath, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	// 2.获取文件大小
+	DWORD dwSize = GetFileSize(hFile, NULL);
+	if (!dwSize)	return 0;
+	char* buff = new char[dwSize];
+
+	// 3.读取文件内容
+	bRet = ReadFile(hFile, buff, dwSize, NULL, NULL);
+	CloseHandle(hFile);
+	if (!bRet)	return 0;
+	std::stringstream input(buff + 3);         // 用于分割的整体
+	std::string temp;                          // 用于单行获取
+	dwSize = 0;
+	m_codeline.clear();
+	while (getline(input, temp))
+	{	//清除VS代码文件末尾标记
+		temp.erase(--temp.end());
+		m_codeline.push_back({ 0,temp });      // 逐行读取并存入数组
+		dwSize++;
+	}
+	//m_codeline[--dwSize].str = "";
+	printf("读取文件成功：行数%lu\n", dwSize);
+	delete[] buff;
+	this->mPath.Format("%s", szPath);
+	this->ShowCode();
+	return TRUE;
+}
+
+BOOL CDebug::ShowCode(DWORD Address/* = 0*/)
+{
+	BOOL bRet = 0;
+	for (size_t i = 0, max = m_codeline.size(); i < max; i++)
+	{
+		IMAGEHLP_LINE64 lineInfo = {};
+		lineInfo.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+		LONG displacement = 0;
+		//获取符号信息
+		SymGetLineFromName64(
+			gDATA.PS.hProcess, NULL,
+			this->mPath.GetBuffer(),
+			i + 1, &displacement, &lineInfo);
+		if (Address == 0)
+		{
+			m_codeline[i].Address = lineInfo.Address;
+			printf("0x%08llX\t源码\t%s\n", lineInfo.Address, m_codeline[i].str.c_str());
+			bRet = 1;
+		}
+		else if (Address == m_codeline[i].Address)
+		{
+			printf("0x%08llX\t%13s %s\n", lineInfo.Address, "|", m_codeline[i].str.c_str());
+			bRet = 1;
+		}
+	}
+	if (bRet)
+		printf("\n");
+	return bRet;
 }
 
 DWORD CDebug::SetBreakPoint(LPVOID Address, WORD Type, BOOL isBreak)

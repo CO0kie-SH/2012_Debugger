@@ -116,6 +116,11 @@ void CPE::DUMP(LPVOID Add, DWORD Size, PWCHAR Name)
 		return;
 	}
 	PIMAGE_DOS_HEADER pDos = (PIMAGE_DOS_HEADER)MOD;
+	if (pDos->e_magic != IMAGE_DOS_SIGNATURE)
+	{
+		printf("\n无法获得的PE头。\n");
+		return;
+	}
 	PIMAGE_NT_HEADERS pNt = (PIMAGE_NT_HEADERS)(pDos->e_lfanew + MOD);
 
 	//修改对齐
@@ -145,4 +150,5 @@ void CPE::DUMP(LPVOID Add, DWORD Size, PWCHAR Name)
 	WriteFile(hFile, MOD, Size, &dwTemp, 0);
 	//关闭句柄
 	CloseHandle(hFile);
+	printf("\n导出文件：%S\n", str.GetBuffer());
 }

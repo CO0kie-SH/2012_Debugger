@@ -309,7 +309,14 @@ SIZE_T CMyPoint::ReadMemory(LPVOID Address, LPVOID ReadBuff, DWORD_PTR ReadLen)
 	SIZE_T Read;
 	if (NULL == ReadProcessMemory(gDATA.PS.hProcess, Address, ReadBuff, ReadLen, &Read))
 	{
-		printf("读取目标内存%p失败%lu。\n", Address, ReadLen);
+		DWORD oldProtect;
+		// 1.修改目标分页属性
+		VirtualProtectEx(gDATA.PS.hProcess, Address, 1, PAGE_READWRITE, &oldProtect);
+		ReadProcessMemory(gDATA.PS.hProcess, Address, ReadBuff, ReadLen, &Read);
+		//4. 恢复目标分页属性
+		VirtualProtectEx(gDATA.PS.hProcess, Address, 1, oldProtect, &oldProtect);
+		if (Read == 0)
+			printf("读取目标内存%p失败%lu。\n", Address, ReadLen);
 	}
 	return Read;
 }

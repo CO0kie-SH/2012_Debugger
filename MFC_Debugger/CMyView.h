@@ -3,8 +3,6 @@
 #include "CDLG_MEM.h"
 #include "CDLG_EDIT.h"
 #include "CDebug.h"
-#include <vector>
-using std::vector;
 
 #define defNum_MAX_¶Ïµã 6
 constexpr PWCHAR gszBreakPoring[] =

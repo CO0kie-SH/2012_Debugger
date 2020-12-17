@@ -1,6 +1,7 @@
 #pragma once
 #define FilePath1 L"..\\Debug\\Ox02_DebugTest.exe"
 #define FilePath2 L"..\\dbgtarget.exe"
+#define FilePath3 L"..\\Debug\\2012_Debugger.exe"
 
 
 typedef struct _MAINWIND
